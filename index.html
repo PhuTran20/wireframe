@@ -1,0 +1,176 @@
+<!DOCTYPE html>
+<html lang="vi">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>DevOps AI Dashboard</title>
+    <link rel="stylesheet" href="styles.css" />
+  </head>
+  <body>
+    <!-- Header -->
+    <header class="dashboard-header">
+      <div class="header-content">
+        <h1>MIDILANG</h1>
+        <div class="header-info">
+          <span id="currentTime"></span>
+          <span class="status-indicator">● Live</span>
+        </div>
+      </div>
+    </header>
+
+    <!-- Main Dashboard -->
+    <main class="dashboard-main">
+      <!-- Left Panel: Chat / Prompt -->
+      <section class="chat-panel" aria-label="Chat Panel">
+        <div class="panel-header">
+          <h2>💬 AI Assistant</h2>
+          <button id="clearChatBtn" class="btn-icon" title="Clear chat">
+            🗑️
+          </button>
+        </div>
+
+        <div
+          class="chat-messages"
+          id="chatMessages"
+          role="log"
+          aria-live="polite"
+        >
+          <!-- Chat messages will be rendered here -->
+        </div>
+
+        <div class="chat-input-container">
+          <textarea
+            id="promptInput"
+            placeholder="Click Voice button to answer questions..."
+            rows="3"
+            aria-label="Prompt input"
+            disabled
+          ></textarea>
+          <div class="chat-actions">
+            <button
+              id="voiceBtn"
+              class="btn-voice"
+              aria-label="Voice chat"
+              title="Click to simulate voice answer"
+            >
+              🎙️ Voice (Click to Answer)
+            </button>
+            <button
+              id="sendBtn"
+              class="btn-primary"
+              aria-label="Send prompt"
+              style="display: none"
+            >
+              Send
+            </button>
+          </div>
+        </div>
+      </section>
+
+      <!-- Center Panel: Summary & Actions -->
+      <section class="center-panel">
+        <!-- Summary Preview -->
+        <div class="summary-section" aria-label="Summary Preview">
+          <div class="panel-header">
+            <h2>📋 Summary</h2>
+            <button
+              id="toggleSummaryBtn"
+              class="btn-icon"
+              title="Expand/Collapse"
+            >
+              ▼
+            </button>
+          </div>
+
+          <div class="summary-content" id="summaryContent">
+            <h3 id="summaryTitle">Welcome to DevOps Dashboard</h3>
+            <ul id="summaryPoints">
+              <li>Use the chat panel to communicate with AI</li>
+              <li>Click voice button to use speech recognition</li>
+              <li>Approve specs and trigger actions</li>
+              <li>Monitor job progress in timeline</li>
+            </ul>
+          </div>
+        </div>
+
+        <!-- Description & Actions -->
+        <div class="actions-section" aria-label="Actions Panel">
+          <div class="panel-header">
+            <h2>⚙️ Actions & Description</h2>
+          </div>
+
+          <div class="description-content" id="descriptionContent">
+            <p>
+              💬 Hãy bắt đầu bằng cách nhấn nút Voice để mô tả dự án của bạn. AI
+              sẽ hỗ trợ thu thập yêu cầu và tạo báo giá cho bạn.
+            </p>
+          </div>
+
+          <div class="action-buttons">
+            <button
+              class="btn-action"
+              style="
+                grid-column: 1 / -1;
+                text-align: center;
+                opacity: 0.5;
+                cursor: not-allowed;
+              "
+              disabled
+            >
+              🎤 Vui lòng hoàn thành Voice Chat để xem báo giá
+            </button>
+          </div>
+        </div>
+      </section>
+
+      <!-- Right Panel: Timeline & Logs -->
+      <aside class="timeline-panel" aria-label="Timeline and Logs">
+        <!-- Timeline -->
+        <div class="timeline-section">
+          <div class="panel-header">
+            <h2>📊 Pipeline Timeline</h2>
+            <button
+              id="clearTimelineBtn"
+              class="btn-icon"
+              title="Clear timeline"
+            >
+              🗑️
+            </button>
+          </div>
+
+          <div class="timeline-content" id="timelineContent">
+            <!-- Timeline jobs will be rendered here -->
+          </div>
+        </div>
+
+        <!-- Build Logs -->
+        <div class="logs-section">
+          <div class="panel-header">
+            <h2>📜 Build Logs</h2>
+            <button id="clearLogsBtn" class="btn-icon" title="Clear logs">
+              🗑️
+            </button>
+          </div>
+
+          <div
+            class="logs-content"
+            id="logsContent"
+            role="log"
+            aria-live="polite"
+            aria-atomic="false"
+          >
+            <!-- Logs will be rendered here -->
+          </div>
+        </div>
+      </aside>
+    </main>
+
+    <!-- Voice Status Indicator -->
+    <div id="voiceStatus" class="voice-status hidden">
+      <span class="pulse-dot"></span>
+      <span>Listening...</span>
+    </div>
+
+    <script src="app.js"></script>
+  </body>
+</html>
