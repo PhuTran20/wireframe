@@ -3,174 +3,533 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>DevOps AI Dashboard</title>
-    <link rel="stylesheet" href="styles.css" />
+    <title>MIDILANG</title>
+    <link rel="stylesheet" href="style.css" />
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"
+    />
   </head>
   <body>
     <!-- Header -->
-    <header class="dashboard-header">
-      <div class="header-content">
-        <h1>MIDILANG</h1>
-        <div class="header-info">
-          <span id="currentTime"></span>
-          <span class="status-indicator">● Live</span>
+    <header class="header">
+      <div class="header-left">
+        <div class="logo">
+          <i class="fas fa-cube"></i>
+          <span>MIDILANG</span>
+        </div>
+        <nav class="header-nav">
+          <a href="#home" class="nav-item active">
+            <i class="fas fa-home"></i>
+            <span>Home</span>
+          </a>
+          <a href="#docs" class="nav-item">
+            <i class="fas fa-book"></i>
+            <span>Docs</span>
+          </a>
+          <a href="#about" class="nav-item">
+            <i class="fas fa-users"></i>
+            <span>Về chúng tôi</span>
+          </a>
+          <a href="#payment" class="nav-item">
+            <i class="fas fa-credit-card"></i>
+            <span>Thanh toán</span>
+          </a>
+          <a href="#policy" class="nav-item">
+            <i class="fas fa-shield-alt"></i>
+            <span>Chính sách</span>
+          </a>
+          <a href="#support" class="nav-item">
+            <i class="fas fa-headset"></i>
+            <span>Hỗ trợ</span>
+          </a>
+        </nav>
+      </div>
+      <div class="header-right">
+        <div class="account-dropdown">
+          <button class="account-btn" id="accountBtn">
+            <i class="fas fa-user-circle"></i>
+            <span>Tài khoản</span>
+            <i class="fas fa-chevron-down"></i>
+          </button>
+          <div class="dropdown-menu" id="dropdownMenu">
+            <a href="#" class="dropdown-item">
+              <i class="fas fa-user"></i> Profile
+            </a>
+            <a href="#" class="dropdown-item">
+              <i class="fas fa-cog"></i> Settings
+            </a>
+            <hr />
+            <a href="#" class="dropdown-item">
+              <i class="fas fa-sign-out-alt"></i> Logout
+            </a>
+          </div>
         </div>
       </div>
     </header>
 
-    <!-- Main Dashboard -->
-    <main class="dashboard-main">
-      <!-- Left Panel: Chat / Prompt -->
-      <section class="chat-panel" aria-label="Chat Panel">
-        <div class="panel-header">
-          <h2>💬 AI Assistant</h2>
-          <button id="clearChatBtn" class="btn-icon" title="Clear chat">
-            🗑️
-          </button>
-        </div>
-
-        <div
-          class="chat-messages"
-          id="chatMessages"
-          role="log"
-          aria-live="polite"
-        >
-          <!-- Chat messages will be rendered here -->
-        </div>
-
-        <div class="chat-input-container">
-          <textarea
-            id="promptInput"
-            placeholder="Click Voice button to answer questions..."
-            rows="3"
-            aria-label="Prompt input"
-            disabled
-          ></textarea>
-          <div class="chat-actions">
+    <!-- Main Container -->
+    <div class="main-container">
+      <!-- Left Column - Chat Voice Prompt -->
+      <div class="left-column" id="leftColumn">
+        <div class="chat-container">
+          <div class="chat-header">
+            <div class="chat-title">
+              <i class="fas fa-comments"></i>
+              <h3>MIDILANG - Voice Chat Assistant</h3>
+            </div>
             <button
-              id="voiceBtn"
-              class="btn-voice"
-              aria-label="Voice chat"
-              title="Click to simulate voice answer"
+              class="toggle-chat-btn"
+              id="toggleChatBtn"
+              title="Đóng/Mở chat"
             >
-              🎙️ Voice (Click to Answer)
-            </button>
-            <button
-              id="sendBtn"
-              class="btn-primary"
-              aria-label="Send prompt"
-              style="display: none"
-            >
-              Send
-            </button>
-          </div>
-        </div>
-      </section>
-
-      <!-- Center Panel: Summary & Actions -->
-      <section class="center-panel">
-        <!-- Summary Preview -->
-        <div class="summary-section" aria-label="Summary Preview">
-          <div class="panel-header">
-            <h2>📋 Summary</h2>
-            <button
-              id="toggleSummaryBtn"
-              class="btn-icon"
-              title="Expand/Collapse"
-            >
-              ▼
+              <i class="fas fa-chevron-left"></i>
             </button>
           </div>
 
-          <div class="summary-content" id="summaryContent">
-            <h3 id="summaryTitle">Welcome to DevOps Dashboard</h3>
-            <ul id="summaryPoints">
-              <li>Use the chat panel to communicate with AI</li>
-              <li>Click voice button to use speech recognition</li>
-              <li>Approve specs and trigger actions</li>
-              <li>Monitor job progress in timeline</li>
-            </ul>
+          <!-- Chat Messages -->
+          <div class="chat-messages" id="chatMessages">
+            <div class="message bot-message">
+              <div class="message-avatar">
+                <i class="fas fa-robot"></i>
+              </div>
+              <div class="message-content">
+                Xin chào! Tôi là trợ lý AI. Hãy nhấn vào micro để bắt đầu mô tả
+                dự án của bạn.
+              </div>
+            </div>
+          </div>
+
+          <!-- Voice Input Controls -->
+          <div class="voice-controls">
+            <div class="voice-input-section">
+              <button
+                class="mic-btn"
+                id="micBtn"
+                title="Nhấn để bắt đầu ghi âm"
+              >
+                <i class="fas fa-microphone"></i>
+              </button>
+              <div class="voice-info">
+                <p class="voice-status" id="voiceStatus">✓ Sẵn sàng ghi âm</p>
+                <div class="voice-visualizer" id="voiceVisualizer">
+                  <div class="voice-bar"></div>
+                  <div class="voice-bar"></div>
+                  <div class="voice-bar"></div>
+                  <div class="voice-bar"></div>
+                  <div class="voice-bar"></div>
+                  <div class="voice-bar"></div>
+                  <div class="voice-bar"></div>
+                  <div class="voice-bar"></div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Floating toggle button when chat is collapsed -->
+      <button
+        class="floating-chat-btn"
+        id="floatingChatBtn"
+        style="display: none"
+      >
+        <i class="fas fa-comments"></i>
+      </button>
+
+      <!-- Right Column - Main Content (Step Flow) -->
+      <div class="right-column">
+        <div class="step-indicator">
+          <div class="step active" data-step="1">
+            <div class="step-number">
+              <i class="fas fa-edit"></i>
+            </div>
+            <div class="step-label">Mô tả dự án</div>
+            <div class="step-desc">Cho chúng tôi biết bạn cần gì</div>
+          </div>
+          <div class="step-line"></div>
+          <div class="step" data-step="2">
+            <div class="step-number">
+              <i class="fas fa-calculator"></i>
+            </div>
+            <div class="step-label">Xem giá & Xác nhận</div>
+            <div class="step-desc">Kiểm tra chi phí dự án</div>
+          </div>
+          <div class="step-line"></div>
+          <div class="step" data-step="3">
+            <div class="step-number">
+              <i class="fas fa-tasks"></i>
+            </div>
+            <div class="step-label">Theo dõi tiến độ</div>
+            <div class="step-desc">Xem quá trình thực hiện</div>
+          </div>
+          <div class="step-line"></div>
+          <div class="step" data-step="4">
+            <div class="step-number">
+              <i class="fas fa-eye"></i>
+            </div>
+            <div class="step-label">Xem thử website</div>
+            <div class="step-desc">Kiểm tra trước khi hoàn tất</div>
+          </div>
+          <div class="step-line"></div>
+          <div class="step" data-step="5">
+            <div class="step-number">
+              <i class="fas fa-check-circle"></i>
+            </div>
+            <div class="step-label">Hoàn thành</div>
+            <div class="step-desc">Đưa website lên internet</div>
           </div>
         </div>
 
-        <!-- Description & Actions -->
-        <div class="actions-section" aria-label="Actions Panel">
-          <div class="panel-header">
-            <h2>⚙️ Actions & Description</h2>
-          </div>
-
-          <div class="description-content" id="descriptionContent">
-            <p>
-              💬 Hãy bắt đầu bằng cách nhấn nút Voice để mô tả dự án của bạn. AI
-              sẽ hỗ trợ thu thập yêu cầu và tạo báo giá cho bạn.
+        <!-- Step Content -->
+        <div class="step-content">
+          <!-- Step 1: Tóm lược kỹ thuật -->
+          <div class="step-panel active" id="step1">
+            <h2><i class="fas fa-edit"></i> Mô tả dự án của bạn</h2>
+            <p class="step-description">
+              Hãy cho chúng tôi biết chi tiết về dự án bạn muốn xây dựng. Càng
+              rõ ràng, chúng tôi càng hiểu bạn hơn!
             </p>
+
+            <div class="qa-table-legend">
+              <h3>Thang điểm đánh giá</h3>
+              <div class="legend-items">
+                <div class="legend-item">
+                  <span class="legend-icon good"
+                    ><i class="fas fa-check-circle"></i
+                  ></span>
+                  <div class="legend-content">
+                    <div class="legend-title">1 - Rõ ràng</div>
+                    <div class="legend-desc">
+                      Câu trả lời chi tiết, đủ thông tin
+                    </div>
+                  </div>
+                </div>
+                <div class="legend-item">
+                  <span class="legend-icon good"
+                    ><i class="fas fa-check"></i
+                  ></span>
+                  <div class="legend-content">
+                    <div class="legend-title">2 - Khá rõ</div>
+                    <div class="legend-desc">
+                      Câu trả lời tốt nhưng có thể chi tiết hơn
+                    </div>
+                  </div>
+                </div>
+                <div class="legend-item">
+                  <span class="legend-icon warning"
+                    ><i class="fas fa-exclamation-triangle"></i
+                  ></span>
+                  <div class="legend-content">
+                    <div class="legend-title">3 - Mơ hồ vừa</div>
+                    <div class="legend-desc">Cần bổ sung thêm thông tin</div>
+                  </div>
+                </div>
+                <div class="legend-item">
+                  <span class="legend-icon danger"
+                    ><i class="fas fa-exclamation-circle"></i
+                  ></span>
+                  <div class="legend-content">
+                    <div class="legend-title">4 - Mơ hồ</div>
+                    <div class="legend-desc">
+                      Thiếu nhiều thông tin quan trọng
+                    </div>
+                  </div>
+                </div>
+                <div class="legend-item">
+                  <span class="legend-icon danger"
+                    ><i class="fas fa-times-circle"></i
+                  ></span>
+                  <div class="legend-content">
+                    <div class="legend-title">5 - Rất mơ hồ</div>
+                    <div class="legend-desc">Cần chỉnh sửa lại hoàn toàn</div>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <div class="qa-list" id="qaList">
+              <!-- Q&A items will be added dynamically -->
+            </div>
+
+            <div class="step-actions">
+              <button class="btn-next" id="nextStep1" style="display: none">
+                <i class="fas fa-arrow-right"></i> Bước tiếp theo
+              </button>
+            </div>
           </div>
 
-          <div class="action-buttons">
-            <button
-              class="btn-action"
-              style="
-                grid-column: 1 / -1;
-                text-align: center;
-                opacity: 0.5;
-                cursor: not-allowed;
-              "
-              disabled
-            >
-              🎤 Vui lòng hoàn thành Voice Chat để xem báo giá
-            </button>
+          <!-- Step 2: Tóm tắt & Báo giá -->
+          <div class="step-panel" id="step2">
+            <h2><i class="fas fa-calculator"></i> Chi phí & Xác nhận</h2>
+
+            <div class="summary-section">
+              <h3>Những tính năng bạn sẽ có</h3>
+              <p class="section-desc">
+                Dựa trên thông tin bạn cung cấp, website của bạn sẽ bao gồm:
+              </p>
+              <div class="features-list" id="featuresList">
+                <!-- Features will be added here dynamically -->
+              </div>
+            </div>
+
+            <div class="quote-section">
+              <h3>Chi phí chi tiết</h3>
+
+              <!-- UI/UX Design Breakdown -->
+              <div class="quote-category">
+                <div class="category-header">
+                  <i class="fas fa-palette"></i>
+                  <span>Thiết kế giao diện (UI/UX)</span>
+                </div>
+                <div class="category-items" id="uiuxItems">
+                  <!-- UI/UX items will be added here -->
+                </div>
+              </div>
+
+              <!-- Features Breakdown -->
+              <div class="quote-category">
+                <div class="category-header">
+                  <i class="fas fa-cogs"></i>
+                  <span>Các tính năng chính</span>
+                </div>
+                <div class="category-items" id="featuresItems">
+                  <!-- Feature items will be added here -->
+                </div>
+              </div>
+
+              <!-- Integration -->
+              <div class="quote-category">
+                <div class="category-header">
+                  <i class="fas fa-plug"></i>
+                  <span>Tích hợp bên thứ 3</span>
+                </div>
+                <div class="category-items" id="integrationItems">
+                  <!-- Integration items will be added here -->
+                </div>
+              </div>
+
+              <!-- Testing & Deployment -->
+              <div class="quote-category">
+                <div class="category-header">
+                  <i class="fas fa-check-circle"></i>
+                  <span>Kiểm tra & Triển khai</span>
+                </div>
+                <div class="category-items" id="testingItems">
+                  <!-- Testing items will be added here -->
+                </div>
+              </div>
+
+              <!-- Additional Features (if any) -->
+              <div
+                class="quote-category"
+                id="additionalCategory"
+                style="display: none"
+              >
+                <div class="category-header">
+                  <i class="fas fa-plus-circle"></i>
+                  <span>Tính năng phát sinh</span>
+                </div>
+                <div class="category-items" id="additionalItems">
+                  <!-- Additional items will be added here -->
+                </div>
+              </div>
+
+              <!-- Total Summary -->
+              <div class="quote-summary">
+                <div class="summary-row">
+                  <span class="summary-label">Tổng chi phí dự án:</span>
+                  <span class="summary-value" id="totalCost">0 đ</span>
+                </div>
+                <div class="summary-row budget-row">
+                  <span class="summary-label">Ngân sách hiện tại của bạn:</span>
+                  <span class="summary-value" id="currentBudget">0 đ</span>
+                </div>
+                <div class="summary-row balance-row" id="balanceRow">
+                  <span class="summary-label">Còn lại sau dự án:</span>
+                  <span class="summary-value balance-value" id="remainingBudget"
+                    >0 đ</span
+                  >
+                </div>
+                <div class="summary-row status-row" id="statusRow">
+                  <span class="summary-label">Trạng thái:</span>
+                  <span class="summary-value status-badge" id="budgetStatus">
+                    <i class="fas fa-spinner fa-spin"></i> Đang tính toán...
+                  </span>
+                </div>
+              </div>
+            </div>
+
+            <div class="timeline-estimate">
+              <div class="estimate-card">
+                <div class="estimate-icon">
+                  <i class="fas fa-calendar-alt"></i>
+                </div>
+                <div class="estimate-content">
+                  <h4>Thời gian hoàn thiện dự kiến</h4>
+                  <p class="estimate-time" id="estimatedTime">
+                    <strong>6-8 tuần</strong>
+                    <span class="estimate-breakdown" id="timeBreakdown">
+                      Thiết kế (2 tuần) + Phát triển (4 tuần) + Kiểm tra (1-2
+                      tuần)
+                    </span>
+                  </p>
+                </div>
+              </div>
+            </div>
+
+            <div class="step-actions">
+              <button
+                class="btn-secondary"
+                id="addBudgetBtn"
+                style="display: none"
+              >
+                <i class="fas fa-wallet"></i> Nạp thêm ngân sách
+              </button>
+              <button class="btn-primary" id="proceedBtn" disabled>
+                <i class="fas fa-hammer"></i> Xác nhận & Bắt đầu thi công
+              </button>
+            </div>
+          </div>
+
+          <!-- Step 3: Timeline -->
+          <div class="step-panel" id="step3">
+            <h2><i class="fas fa-tasks"></i> Theo dõi tiến độ làm việc</h2>
+            <p class="step-description">
+              Chúng tôi đang làm việc cho bạn! Xem chi tiết các tính năng đang
+              được thực hiện.
+            </p>
+
+            <div class="progress-container">
+              <!-- Left column: Feature and pages detail -->
+              <div class="progress-left">
+                <div class="feature-pipeline" id="featurePipeline">
+                  <!-- Feature items will be added here -->
+                </div>
+              </div>
+
+              <!-- Right column: Progress visualization -->
+              <div class="progress-right">
+                <div class="progress-summary" id="progressSummary">
+                  <!-- Progress summary will be added here -->
+                </div>
+              </div>
+            </div>
+
+            <div class="step-actions">
+              <button class="btn-next" id="nextStep3" disabled>
+                <i class="fas fa-arrow-right"></i> Bước tiếp theo
+              </button>
+            </div>
+          </div>
+
+          <!-- Step 4: Xem thử website -->
+          <div class="step-panel" id="step4">
+            <h2><i class="fas fa-eye"></i> Xem thử website của bạn</h2>
+            <p class="step-description">
+              Website đã hoàn thành! Hãy xem thử và kiểm tra kỹ trước khi đưa
+              lên internet.
+            </p>
+
+            <div class="preview-tabs" id="previewTabs">
+              <button class="tab-btn active" data-tab="admin">
+                <i class="fas fa-user-shield"></i> Admin
+              </button>
+              <button class="tab-btn" data-tab="client">
+                <i class="fas fa-user"></i> Client
+              </button>
+            </div>
+
+            <div class="preview-container">
+              <div class="preview-frame" id="previewFrame">
+                <div class="preview-placeholder">
+                  <i class="fas fa-desktop"></i>
+                  <p>Preview website của bạn sẽ hiển thị ở đây</p>
+                </div>
+              </div>
+            </div>
+
+            <div class="comment-section">
+              <h3>
+                <i class="fas fa-comment-dots"></i> Có điều gì cần chỉnh sửa?
+              </h3>
+              <textarea
+                id="commentInput"
+                placeholder="Nhập ý kiến của bạn (nếu có)..."
+              ></textarea>
+              <button class="btn-secondary" id="submitCommentBtn">
+                <i class="fas fa-paper-plane"></i> Gửi yêu cầu chỉnh sửa
+              </button>
+            </div>
+
+            <div class="step-actions">
+              <button class="btn-next" id="nextStep4">
+                <i class="fas fa-arrow-right"></i> Tiếp tục - Hoàn thành
+              </button>
+            </div>
+          </div>
+
+          <!-- Step 5: Hoàn thành -->
+          <div class="step-panel" id="step5">
+            <h2>
+              <i class="fas fa-check-circle"></i> Đưa website lên internet!
+            </h2>
+            <p class="step-description">
+              Mọi thứ đã sẵn sàng! Nhấn nút bên dưới để đưa website của bạn lên
+              internet và bắt đầu sử dụng.
+            </p>
+
+            <div class="final-preview">
+              <div class="preview-info">
+                <h3><i class="fas fa-globe"></i> Thông tin website</h3>
+                <div class="info-row">
+                  <span>Địa chỉ website:</span>
+                  <strong id="websiteUrl">Chưa deploy</strong>
+                </div>
+                <div class="info-row">
+                  <span>Trạng thái:</span>
+                  <strong id="deployStatus">Sẵn sàng deploy</strong>
+                </div>
+              </div>
+            </div>
+
+            <div class="step-actions">
+              <button class="btn-primary" id="deployBtn">
+                <i class="fas fa-rocket"></i> Đưa lên internet ngay
+              </button>
+            </div>
+
+            <div class="deploy-result" id="deployResult" style="display: none">
+              <i class="fas fa-check-circle"></i>
+              <h3>Chúc mừng! Website đã sẵn sàng!</h3>
+              <p>Website của bạn đã được đưa lên internet thành công</p>
+              <a href="#" id="deployLink" target="_blank" class="btn-primary">
+                <i class="fas fa-external-link-alt"></i> Mở website của tôi
+              </a>
+            </div>
           </div>
         </div>
-      </section>
-
-      <!-- Right Panel: Timeline & Logs -->
-      <aside class="timeline-panel" aria-label="Timeline and Logs">
-        <!-- Timeline -->
-        <div class="timeline-section">
-          <div class="panel-header">
-            <h2>📊 Pipeline Timeline</h2>
-            <button
-              id="clearTimelineBtn"
-              class="btn-icon"
-              title="Clear timeline"
-            >
-              🗑️
-            </button>
-          </div>
-
-          <div class="timeline-content" id="timelineContent">
-            <!-- Timeline jobs will be rendered here -->
-          </div>
-        </div>
-
-        <!-- Build Logs -->
-        <div class="logs-section">
-          <div class="panel-header">
-            <h2>📜 Build Logs</h2>
-            <button id="clearLogsBtn" class="btn-icon" title="Clear logs">
-              🗑️
-            </button>
-          </div>
-
-          <div
-            class="logs-content"
-            id="logsContent"
-            role="log"
-            aria-live="polite"
-            aria-atomic="false"
-          >
-            <!-- Logs will be rendered here -->
-          </div>
-        </div>
-      </aside>
-    </main>
-
-    <!-- Voice Status Indicator -->
-    <div id="voiceStatus" class="voice-status hidden">
-      <span class="pulse-dot"></span>
-      <span>Listening...</span>
+      </div>
     </div>
 
-    <script src="app.js"></script>
+    <!-- Modal for Budget Top-up -->
+    <div class="modal" id="budgetModal">
+      <div class="modal-content">
+        <span class="close-modal">&times;</span>
+        <h2><i class="fas fa-wallet"></i> Nạp thêm ngân sách</h2>
+        <p>Vui lòng nhập số tiền cần nạp thêm:</p>
+        <input
+          type="number"
+          id="topupAmount"
+          placeholder="Nhập số tiền (VNĐ)"
+        />
+        <div class="modal-actions">
+          <button class="btn-secondary" id="cancelTopup">Hủy</button>
+          <button class="btn-primary" id="confirmTopup">Xác nhận</button>
+        </div>
+      </div>
+    </div>
+
+    <script src="script.js"></script>
   </body>
 </html>
