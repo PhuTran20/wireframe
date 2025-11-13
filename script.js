@@ -7,7 +7,10 @@ const appState = {
     totalCost: 0,
     features: [],
     chatHistory: [],
-    editingIndex: null // Để track câu hỏi đang được chỉnh sửa
+    editingIndex: null, // Để track câu hỏi đang được chỉnh sửa
+    summaryViewed: false, // Track if user has viewed the summary modal
+    completionMessageShown: false, // Track if completion message was shown
+    improvementMessageShown: false // Track if improvement message was shown
 };
 
 // Mock LLM Responses
@@ -399,6 +402,8 @@ function initializeEventListeners() {
     
     // Step Navigation
     document.getElementById('nextStep1')?.addEventListener('click', () => goToStep(2));
+    document.getElementById('summaryBtn')?.addEventListener('click', openSummaryModal);
+    document.getElementById('endChatBtn')?.addEventListener('click', openEndChatModal);
     document.getElementById('nextStep3')?.addEventListener('click', () => goToStep(4));
     document.getElementById('nextStep4')?.addEventListener('click', () => goToStep(5));
     document.getElementById('proceedBtn')?.addEventListener('click', startConstruction);
@@ -407,9 +412,10 @@ function initializeEventListeners() {
     document.getElementById('submitCommentBtn')?.addEventListener('click', submitComment);
     
     // Step indicator clicks - allow going back to completed steps
-    document.querySelectorAll('.step').forEach((stepEl, index) => {
+    document.querySelectorAll('.step').forEach((stepEl) => {
         stepEl.addEventListener('click', () => {
-            const stepNumber = index + 1;
+            const stepDataAttr = stepEl.getAttribute('data-step');
+            const stepNumber = parseInt(stepDataAttr);
             // Allow clicking if step is completed or is the current step
             if (stepEl.classList.contains('completed') || stepEl.classList.contains('active')) {
                 goToStep(stepNumber);
@@ -748,26 +754,102 @@ function generateStars(score) {
 }
 
 function checkStep1Completion() {
+    const summaryBtn = document.getElementById('summaryBtn');
     const nextBtn = document.getElementById('nextStep1');
+    const endChatBtn = document.getElementById('endChatBtn');
     const allQuestionsAnswered = appState.qaData.length >= mockQuestions.length;
     // Đảo ngược: điểm <= 2 là tốt (1 = Rõ ràng, 2 = Khá rõ)
     const allScoresGood = appState.qaData.every(qa => qa.score <= 2);
     
+    // Always show "End Chat" button if at least one question is answered
+    if (appState.qaData.length > 0) {
+        endChatBtn.style.display = 'inline-flex';
+    }
+    
     if (allQuestionsAnswered) {
+        // Show summary button
+        summaryBtn.style.display = 'inline-flex';
+        
         if (allScoresGood) {
-            // Show button and enable it
-            nextBtn.style.display = 'inline-flex';
-            nextBtn.disabled = false;
-            addChatMessage('✅ Tất cả câu trả lời đều rõ ràng! Bạn có thể tiếp tục sang bước tiếp theo.', 'bot');
+            // Don't show next button automatically anymore
+            // It will only show after user closes the end chat modal
+            // Check if user has already viewed the summary
+            if (appState.summaryViewed) {
+                nextBtn.style.display = 'inline-flex';
+                nextBtn.disabled = false;
+            } else {
+                nextBtn.style.display = 'none';
+                // Only show message once when all questions are answered
+                if (!appState.completionMessageShown) {
+                    addChatMessage('✅ Tất cả câu trả lời đều rõ ràng! Hãy nhấn "Kết thúc trò chuyện" để xem tóm tắt dự án.', 'bot');
+                    appState.completionMessageShown = true;
+                }
+            }
         } else {
-            // Hide button when not all scores are good
+            // Hide next button when not all scores are good
             nextBtn.style.display = 'none';
-            addChatMessage('⚠️ Một số câu trả lời chưa đủ rõ ràng. Vui lòng click vào nút bánh răng ⚙️ để chỉnh sửa các câu có điểm < 4.', 'bot');
+            if (!appState.improvementMessageShown) {
+                addChatMessage('⚠️ Một số câu trả lời chưa đủ rõ ràng. Vui lòng click vào nút bánh răng ⚙️ để chỉnh sửa các câu có điểm > 2.', 'bot');
+                appState.improvementMessageShown = true;
+            }
         }
     } else {
-        // Hide button when not all questions answered
+        // Hide both buttons when not all questions answered
+        summaryBtn.style.display = 'none';
         nextBtn.style.display = 'none';
     }
+}
+
+function openSummaryModal() {
+    const modal = document.getElementById('summaryModal');
+    
+    // Populate summary data
+    const typeAnswer = appState.qaData[0]?.answer || 'Website E-commerce';
+    const featuresAnswer = appState.qaData[1]?.answer || 'Giỏ hàng, Thanh toán';
+    const designAnswer = appState.qaData[2]?.answer || 'Thiết kế hiện đại, Responsive';
+    const integrationAnswer = appState.qaData[3]?.answer || 'VNPay, Momo';
+    const timelineAnswer = appState.qaData[4]?.answer || '6-8 tuần';
+    
+    // Update summary cards
+    document.getElementById('modalSummaryType').textContent = typeAnswer;
+    
+    // Parse features list
+    const featuresList = featuresAnswer.split(',').map(f => f.trim());
+    const featuresHtml = featuresList.map(f => `<li>${f}</li>`).join('');
+    document.getElementById('modalSummaryFeatures').innerHTML = featuresHtml;
+    
+    document.getElementById('modalSummaryDesign').textContent = designAnswer;
+    document.getElementById('modalSummaryIntegration').textContent = integrationAnswer;
+    document.getElementById('modalSummaryTimeline').textContent = timelineAnswer;
+    
+    // Populate Q&A list
+    const qaListHtml = appState.qaData.map((qa, index) => {
+        const scoreLabel = getScoreLabel(qa.score);
+        const statusClass = qa.score <= 2 ? 'completed' : 'needs-improvement';
+        const statusIcon = qa.score <= 2 ? 'fa-check-circle' : 'fa-exclamation-circle';
+        
+        return `
+            <div class="summary-qa-item ${statusClass}">
+                <div class="qa-item-number">${index + 1}</div>
+                <div class="qa-item-content">
+                    <div class="qa-item-question">${qa.question}</div>
+                    <div class="qa-item-answer">${qa.answer}</div>
+                    <div class="qa-item-score">
+                        <i class="fas ${statusIcon}"></i>
+                        <span>${scoreLabel} (${qa.score}/5)</span>
+                    </div>
+                </div>
+            </div>
+        `;
+    }).join('');
+    
+    document.getElementById('modalQAList').innerHTML = qaListHtml;
+    
+    modal.style.display = 'flex';
+}
+
+function closeSummaryModal() {
+    document.getElementById('summaryModal').style.display = 'none';
 }
 
 // Edit QA Item
@@ -803,6 +885,10 @@ function refreshQAList() {
     appState.qaData.forEach((qa, index) => {
         addQAItemFromData(qa, index);
     });
+    
+    // Reset message flags when list is refreshed (after editing)
+    appState.completionMessageShown = false;
+    appState.improvementMessageShown = false;
 }
 
 function addQAItemFromData(qa, index) {
@@ -1179,14 +1265,18 @@ function goToStep(stepNumber) {
     appState.currentStep = stepNumber;
     
     // Update step indicator
-    document.querySelectorAll('.step').forEach((step, index) => {
+    const steps = document.querySelectorAll('.step');
+    steps.forEach((step) => {
+        const stepData = step.getAttribute('data-step');
+        const stepNum = parseInt(stepData);
+        
         step.classList.remove('active');
         step.classList.remove('completed');
         
-        if (index + 1 < stepNumber) {
+        if (stepNum < stepNumber) {
             step.classList.add('completed');
         }
-        if (index + 1 === stepNumber) {
+        if (stepNum === stepNumber) {
             step.classList.add('active');
         }
     });
@@ -1195,7 +1285,9 @@ function goToStep(stepNumber) {
     document.querySelectorAll('.step-panel').forEach(panel => {
         panel.classList.remove('active');
     });
-    document.getElementById(`step${stepNumber}`).classList.add('active');
+    
+    const panelId = `step${stepNumber}`;
+    document.getElementById(panelId).classList.add('active');
     
     // Load step data
     switch(stepNumber) {
@@ -1233,3 +1325,305 @@ function typeMessage(element, text, speed = 30) {
 }
 
 console.log('🚀 AI Website Builder initialized!');
+
+// ============================================
+// END CHAT MODAL FUNCTIONS
+// ============================================
+
+function openEndChatModal() {
+    const modal = document.getElementById('endChatModal');
+    const allQuestionsAnswered = appState.qaData.length >= mockQuestions.length;
+    const allScoresGood = appState.qaData.every(qa => qa.score <= 2);
+    
+    if (allScoresGood && allQuestionsAnswered) {
+        // Case 1: All information is sufficient - Show natural language summary directly
+        showSufficientSummary();
+        modal.style.display = 'flex';
+        
+        // Add animation class
+        const modalContent = modal.querySelector('.modal-content');
+        modalContent.style.animation = 'modalSlideIn 0.3s ease-out';
+    } else {
+        // Case 2: Need more information
+        showInsufficientSummary();
+        modal.style.display = 'flex';
+        
+        // Add animation class
+        const modalContent = modal.querySelector('.modal-content');
+        modalContent.style.animation = 'modalSlideIn 0.3s ease-out';
+    }
+}
+
+function openSummaryModal() {
+    // This function now also uses the natural language summary
+    openEndChatModal();
+}
+
+function closeEndChatModal() {
+    const modal = document.getElementById('endChatModal');
+    modal.style.display = 'none';
+    
+    // Check if all data is sufficient and mark summary as viewed
+    const allQuestionsAnswered = appState.qaData.length >= mockQuestions.length;
+    const allScoresGood = appState.qaData.every(qa => qa.score <= 2);
+    
+    if (allScoresGood && allQuestionsAnswered) {
+        // Mark summary as viewed
+        appState.summaryViewed = true;
+        
+        // Show the next button now with highlight animation
+        const nextBtn = document.getElementById('nextStep1');
+        nextBtn.style.display = 'inline-flex';
+        nextBtn.disabled = false;
+        nextBtn.classList.add('highlight');
+        
+        // Remove highlight class after animation
+        setTimeout(() => {
+            nextBtn.classList.remove('highlight');
+        }, 2000);
+        
+        // Add a friendly message
+        addChatMessage('🎉 Tuyệt vời! Bạn có thể nhấn "Bước tiếp theo" để xem báo giá chi tiết cho dự án của mình.', 'bot');
+        
+        // Scroll to show the button
+        setTimeout(() => {
+            const stepActions = document.querySelector('.step-actions');
+            if (stepActions) {
+                stepActions.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+            }
+        }, 300);
+    }
+}
+
+function showSufficientSummary() {
+    document.getElementById('endChatContentSufficient').style.display = 'block';
+    document.getElementById('endChatContentInsufficient').style.display = 'none';
+    
+    const summaryContent = document.getElementById('endChatSummaryContent');
+    const naturalSummary = generateNaturalLanguageSummary();
+    
+    summaryContent.innerHTML = `
+        <div class="natural-summary">
+            <div class="summary-intro">
+                <div class="intro-icon">
+                    <i class="fas fa-check-circle"></i>
+                </div>
+                <div class="intro-text">
+                    <h3>Tuyệt vời! Chúng tôi đã hiểu rõ dự án của bạn</h3>
+                    <p>${naturalSummary.intro}</p>
+                </div>
+            </div>
+            
+            <div class="summary-sections">
+                ${naturalSummary.sections.map(section => `
+                    <div class="summary-section-item">
+                        <div class="section-header">
+                            <div class="section-icon">
+                                <i class="${section.icon}"></i>
+                            </div>
+                            <h4>${section.title}</h4>
+                        </div>
+                        <div class="section-content">
+                            <p>${section.content}</p>
+                        </div>
+                    </div>
+                `).join('')}
+            </div>
+            
+            <div class="summary-next-steps">
+                <div class="next-steps-icon">
+                    <i class="fas fa-rocket"></i>
+                </div>
+                <div class="next-steps-content">
+                    <h4>Bước tiếp theo - Xem báo giá</h4>
+                    <p>${naturalSummary.nextSteps}</p>
+                </div>
+            </div>
+        </div>
+    `;
+}
+
+function showInsufficientSummary() {
+    document.getElementById('endChatContentSufficient').style.display = 'none';
+    document.getElementById('endChatContentInsufficient').style.display = 'block';
+    
+    // Show what has been provided
+    const providedInfo = document.getElementById('providedInfoSummary');
+    const providedSummary = generateProvidedInfoSummary();
+    providedInfo.innerHTML = providedSummary;
+    
+    // Show missing questions
+    const missingList = document.getElementById('missingQuestionsList');
+    const missingQuestions = getMissingOrPoorQuestions();
+    
+    missingList.innerHTML = missingQuestions.map((item, index) => `
+        <div class="missing-question-item">
+            <div class="missing-q-number">${index + 1}</div>
+            <div class="missing-q-content">
+                <div class="missing-q-text">
+                    <i class="fas fa-question-circle"></i>
+                    <strong>${item.question}</strong>
+                </div>
+                <div class="missing-q-hint">
+                    <i class="fas fa-info-circle"></i>
+                    ${item.hint}
+                </div>
+                ${item.currentAnswer ? `
+                    <div class="missing-q-current">
+                        <strong>Câu trả lời hiện tại:</strong> ${item.currentAnswer}
+                        <br><strong>Vấn đề:</strong> ${item.issue}
+                    </div>
+                ` : ''}
+            </div>
+        </div>
+    `).join('');
+}
+
+function generateNaturalLanguageSummary() {
+    const qaData = appState.qaData;
+    
+    // Extract information from answers
+    const websiteType = qaData[0]?.answer || 'website của bạn';
+    const features = qaData[1]?.answer || 'các tính năng cơ bản';
+    const design = qaData[2]?.answer || 'giao diện đẹp mắt';
+    const integration = qaData[3]?.answer || 'các hệ thống cần thiết';
+    const timeline = qaData[4]?.answer || 'thời gian phù hợp';
+    
+    // Parse features to create a more natural description
+    const featuresList = features.split(',').map(f => f.trim()).slice(0, 3);
+    const featuresText = featuresList.length > 0 
+        ? featuresList.join(', ') 
+        : 'các tính năng theo yêu cầu của bạn';
+    
+    return {
+        intro: `Sau khi trao đổi với bạn, chúng tôi hiểu rằng bạn cần một ${websiteType}. Đây là một dự án thú vị và chúng tôi hoàn toàn có thể giúp bạn biến ý tưởng thành hiện thực!`,
+        sections: [
+            {
+                icon: 'fas fa-lightbulb',
+                title: 'Mục đích của website',
+                content: `Bạn muốn xây dựng ${websiteType}. Website này sẽ giúp bạn tiếp cận khách hàng, tăng doanh số và phát triển kinh doanh online một cách chuyên nghiệp.`
+            },
+            {
+                icon: 'fas fa-tools',
+                title: 'Những gì website sẽ làm được',
+                content: `Website sẽ có đầy đủ các tính năng như ${featuresText}. Tất cả đều được thiết kế để người dùng dễ sử dụng, giúp bạn quản lý dễ dàng và tăng hiệu quả kinh doanh.`
+            },
+            {
+                icon: 'fas fa-palette',
+                title: 'Thiết kế và trải nghiệm',
+                content: `${design}. Chúng tôi sẽ tạo ra một website vừa đẹp mắt, vừa dễ sử dụng. Website sẽ hoạt động mượt mà trên mọi thiết bị: điện thoại, máy tính bảng và laptop.`
+            },
+            {
+                icon: 'fas fa-link',
+                title: 'Kết nối với các dịch vụ khác',
+                content: `Website sẽ được kết nối với ${integration}. Nhờ đó, bạn có thể quản lý mọi thứ tập trung hơn, khách hàng thanh toán dễ dàng hơn, và bạn có thể theo dõi hiệu quả kinh doanh một cách rõ ràng.`
+            },
+            {
+                icon: 'fas fa-calendar-check',
+                title: 'Thời gian và quy trình làm việc',
+                content: `Dự án sẽ hoàn thành trong khoảng ${timeline}. Chúng tôi sẽ làm việc từng bước: thiết kế → phát triển → kiểm tra → bàn giao. Bạn sẽ được xem và góp ý ở mỗi bước để đảm bảo mọi thứ đúng như mong muốn.`
+            }
+        ],
+        nextSteps: 'Ở bước tiếp theo, chúng tôi sẽ tính toán chi phí cụ thể cho dự án này. Bạn sẽ thấy chi tiết từng phần chi phí, tổng tiền cần đầu tư, và thời gian hoàn thành chính xác. Sau đó bạn có thể quyết định có tiếp tục hay không.'
+    };
+}
+
+function generateProvidedInfoSummary() {
+    const qaData = appState.qaData;
+    
+    if (qaData.length === 0) {
+        return '<p class="no-info">Bạn chưa cung cấp thông tin nào. Hãy bắt đầu bằng cách nhấn nút micro và nói về dự án của bạn.</p>';
+    }
+    
+    const goodAnswers = qaData.filter(qa => qa.score <= 2);
+    
+    return `
+        <div class="provided-summary-text">
+            <p>Bạn đã trả lời <strong>${qaData.length}</strong> trong số <strong>${mockQuestions.length}</strong> câu hỏi.</p>
+            <p>Trong đó, có <strong>${goodAnswers.length}</strong> câu trả lời rõ ràng và đầy đủ thông tin.</p>
+        </div>
+        ${goodAnswers.length > 0 ? `
+            <div class="good-answers-list">
+                <h4><i class="fas fa-check-circle"></i> Những thông tin tốt bạn đã cung cấp:</h4>
+                ${goodAnswers.map(qa => `
+                    <div class="good-answer-item">
+                        <div class="good-answer-q"><strong>Câu hỏi:</strong> ${qa.question}</div>
+                        <div class="good-answer-a"><strong>Trả lời:</strong> ${qa.answer}</div>
+                    </div>
+                `).join('')}
+            </div>
+        ` : ''}
+    `;
+}
+
+function getMissingOrPoorQuestions() {
+    const result = [];
+    
+    // Check all questions
+    for (let i = 0; i < mockQuestions.length; i++) {
+        const question = mockQuestions[i];
+        const qa = appState.qaData[i];
+        
+        if (!qa) {
+            // Not answered yet
+            result.push({
+                question: question,
+                hint: getQuestionHint(i),
+                currentAnswer: null,
+                issue: null
+            });
+        } else if (qa.score > 2) {
+            // Poor answer
+            result.push({
+                question: question,
+                hint: getQuestionHint(i),
+                currentAnswer: qa.answer,
+                issue: getIssueDescription(qa.score)
+            });
+        }
+    }
+    
+    return result;
+}
+
+function getQuestionHint(questionIndex) {
+    const hints = [
+        'Ví dụ: "Tôi muốn làm website bán hàng online cho shop quần áo" hoặc "Website giới thiệu công ty xây dựng"',
+        'Ví dụ: "Cần có giỏ hàng, thanh toán online, quản lý đơn hàng" hoặc "Form liên hệ, gallery ảnh dự án, trang tin tức"',
+        'Ví dụ: "Thiết kế hiện đại, màu xanh lá chủ đạo, phù hợp với giới trẻ" hoặc "Giao diện chuyên nghiệp, đơn giản, dễ đọc"',
+        'Ví dụ: "Kết nối với VNPay và Momo để thanh toán" hoặc "Tích hợp Facebook, Google Maps, email marketing"',
+        'Ví dụ: "Cần xong trong 2 tháng" hoặc "Không gấp, khoảng 3-4 tháng là được"'
+    ];
+    return hints[questionIndex] || 'Hãy trả lời chi tiết nhất có thể.';
+}
+
+function getIssueDescription(score) {
+    const issues = {
+        3: 'Câu trả lời hơi ngắn, cần thêm chi tiết để chúng tôi hiểu rõ hơn về yêu cầu của bạn.',
+        4: 'Câu trả lời chưa đủ thông tin. Vui lòng cung cấp thêm chi tiết cụ thể.',
+        5: 'Câu trả lời quá chung chung. Chúng tôi cần thông tin cụ thể hơn để có thể hỗ trợ bạn tốt nhất.'
+    };
+    return issues[score] || 'Cần cải thiện câu trả lời.';
+}
+
+function proceedFromEndChat() {
+    const modal = document.getElementById('endChatModal');
+    modal.style.display = 'none';
+    
+    // Mark summary as viewed
+    appState.summaryViewed = true;
+    
+    // Show the next button
+    const nextBtn = document.getElementById('nextStep1');
+    nextBtn.style.display = 'inline-flex';
+    nextBtn.disabled = false;
+    
+    // Add a friendly message and go to next step
+    addChatMessage('🎉 Tuyệt vời! Chuyển sang bước xem báo giá...', 'bot');
+    
+    // Auto navigate to step 2 after a short delay
+    setTimeout(() => {
+        goToStep(2);
+    }, 1000);
+}
+

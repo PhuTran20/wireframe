@@ -23,22 +23,7 @@
             <i class="fas fa-home"></i>
             <span>Home</span>
           </a>
-          <a href="#docs" class="nav-item">
-            <i class="fas fa-book"></i>
-            <span>Docs</span>
-          </a>
-          <a href="#about" class="nav-item">
-            <i class="fas fa-users"></i>
-            <span>Về chúng tôi</span>
-          </a>
-          <a href="#payment" class="nav-item">
-            <i class="fas fa-credit-card"></i>
-            <span>Thanh toán</span>
-          </a>
-          <a href="#policy" class="nav-item">
-            <i class="fas fa-shield-alt"></i>
-            <span>Chính sách</span>
-          </a>
+
           <a href="#support" class="nav-item">
             <i class="fas fa-headset"></i>
             <span>Hỗ trợ</span>
@@ -55,6 +40,10 @@
           <div class="dropdown-menu" id="dropdownMenu">
             <a href="#" class="dropdown-item">
               <i class="fas fa-user"></i> Profile
+            </a>
+            <a href="#payment" class="dropdown-item">
+              <i class="fas fa-credit-card"></i>
+              <span>Thanh toán</span>
             </a>
             <a href="#" class="dropdown-item">
               <i class="fas fa-cog"></i> Settings
@@ -253,9 +242,25 @@
             </div>
 
             <div class="step-actions">
-              <button class="btn-next" id="nextStep1" style="display: none">
-                <i class="fas fa-arrow-right"></i> Bước tiếp theo
+              <button
+                class="btn-end-chat"
+                id="endChatBtn"
+                style="display: none"
+              >
+                <i class="fas fa-times-circle"></i> Kết thúc trò chuyện
               </button>
+              <div class="step-actions-right">
+                <button
+                  class="btn-secondary"
+                  id="summaryBtn"
+                  style="display: none"
+                >
+                  <i class="fas fa-file-alt"></i> Tóm tắt nội dung
+                </button>
+                <button class="btn-next" id="nextStep1" style="display: none">
+                  <i class="fas fa-arrow-right"></i> Bước tiếp theo
+                </button>
+              </div>
             </div>
           </div>
 
@@ -507,6 +512,153 @@
                 <i class="fas fa-external-link-alt"></i> Mở website của tôi
               </a>
             </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Modal for Summary -->
+    <div class="modal" id="summaryModal">
+      <div class="modal-content">
+        <span class="close-modal" onclick="closeSummaryModal()">&times;</span>
+        <h2><i class="fas fa-file-alt"></i> Tóm tắt nội dung dự án</h2>
+        <p class="modal-subtitle">
+          Dựa trên thông tin bạn cung cấp, chúng tôi sẽ xây dựng:
+        </p>
+
+        <div class="summary-modal-content">
+          <!-- Summary cards -->
+          <div class="summary-modal-card">
+            <div class="summary-modal-icon">
+              <i class="fas fa-shopping-bag"></i>
+            </div>
+            <div class="summary-modal-text">
+              <h4>Loại website</h4>
+              <p id="modalSummaryType">Website E-commerce</p>
+            </div>
+          </div>
+
+          <div class="summary-modal-card">
+            <div class="summary-modal-icon">
+              <i class="fas fa-cogs"></i>
+            </div>
+            <div class="summary-modal-text">
+              <h4>Tính năng chính</h4>
+              <ul id="modalSummaryFeatures">
+                <li>Giỏ hàng thông minh</li>
+                <li>Thanh toán trực tuyến</li>
+              </ul>
+            </div>
+          </div>
+
+          <div class="summary-modal-card">
+            <div class="summary-modal-icon">
+              <i class="fas fa-palette"></i>
+            </div>
+            <div class="summary-modal-text">
+              <h4>Thiết kế & Giao diện</h4>
+              <p id="modalSummaryDesign">Thiết kế hiện đại, Responsive</p>
+            </div>
+          </div>
+
+          <div class="summary-modal-card">
+            <div class="summary-modal-icon">
+              <i class="fas fa-plug"></i>
+            </div>
+            <div class="summary-modal-text">
+              <h4>Tích hợp hệ thống</h4>
+              <p id="modalSummaryIntegration">VNPay, Momo</p>
+            </div>
+          </div>
+
+          <div class="summary-modal-card">
+            <div class="summary-modal-icon">
+              <i class="fas fa-calendar-alt"></i>
+            </div>
+            <div class="summary-modal-text">
+              <h4>Thời gian thực hiện</h4>
+              <p id="modalSummaryTimeline">6-8 tuần</p>
+            </div>
+          </div>
+        </div>
+
+        <div class="summary-modal-qa">
+          <h3><i class="fas fa-list"></i> Chi tiết từng câu hỏi</h3>
+          <div id="modalQAList">
+            <!-- Q&A details will be added here -->
+          </div>
+        </div>
+
+        <div class="modal-actions">
+          <button class="btn-secondary" onclick="closeSummaryModal()">
+            Đóng
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Modal for End Chat Summary -->
+    <div class="modal" id="endChatModal">
+      <div class="modal-content modal-large">
+        <span class="close-modal" onclick="closeEndChatModal()">&times;</span>
+        <div id="endChatContentSufficient" style="display: none">
+          <h2><i class="fas fa-file-contract"></i> Tóm tắt dự án của bạn</h2>
+          <p class="modal-subtitle">
+            Cảm ơn bạn đã chia sẻ thông tin! Dựa trên cuộc trò chuyện vừa rồi,
+            đây là bản tóm tắt chi tiết về dự án mà bạn muốn thực hiện:
+          </p>
+
+          <div class="end-chat-summary" id="endChatSummaryContent">
+            <!-- Summary will be generated here -->
+          </div>
+
+          <div class="modal-actions">
+            <button class="btn-secondary" onclick="closeEndChatModal()">
+              <i class="fas fa-edit"></i> Quay lại chỉnh sửa
+            </button>
+            <button class="btn-primary" onclick="proceedFromEndChat()">
+              <i class="fas fa-arrow-right"></i> Xem báo giá chi tiết
+            </button>
+          </div>
+        </div>
+
+        <div id="endChatContentInsufficient" style="display: none">
+          <h2>
+            <i class="fas fa-exclamation-triangle"></i> Cần thêm thông tin
+          </h2>
+          <p class="modal-subtitle">
+            Cảm ơn bạn đã chia sẻ! Tuy nhiên, để chúng tôi có thể tạo ra website
+            hoàn hảo cho bạn, chúng tôi cần thêm một số thông tin quan trọng.
+          </p>
+
+          <div class="insufficient-summary">
+            <h3>
+              <i class="fas fa-info-circle"></i> Thông tin bạn đã cung cấp
+            </h3>
+            <div id="providedInfoSummary" class="provided-info">
+              <!-- Summary of provided info -->
+            </div>
+          </div>
+
+          <div class="missing-questions">
+            <h3>
+              <i class="fas fa-clipboard-question"></i> Vui lòng trả lời thêm
+              các câu hỏi sau
+            </h3>
+            <p class="missing-desc">
+              Hãy nhấn vào nút micro <i class="fas fa-microphone"></i> và trả
+              lời từng câu hỏi bên dưới. Bạn chỉ cần nói tự nhiên như khi trò
+              chuyện, chúng tôi sẽ hiểu và ghi nhận.
+            </p>
+            <div id="missingQuestionsList" class="missing-questions-list">
+              <!-- Missing questions will be listed here -->
+            </div>
+          </div>
+
+          <div class="modal-actions">
+            <button class="btn-primary" onclick="closeEndChatModal()">
+              <i class="fas fa-microphone"></i> Tiếp tục trả lời
+            </button>
           </div>
         </div>
       </div>
