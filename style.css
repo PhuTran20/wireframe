@@ -1278,9 +1278,555 @@ body {
 }
 
 /* Summary & Quote (Step 2) */
+/* Project Recap Section */
+.project-recap {
+    background: #f4f4f4;
+    padding: 24px;
+    margin-bottom: 24px;
+}
+
+.recap-header {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin-bottom: 16px;
+}
+
+.recap-header i {
+    font-size: 24px;
+    color: #0f62fe;
+}
+
+.recap-header h3 {
+    margin: 0;
+    font-size: 18px;
+    color: #161616;
+}
+
+.recap-intro {
+    margin-bottom: 16px;
+    color: #525252;
+    line-height: 1.6;
+}
+
+.recap-intro p {
+    margin: 0;
+}
+
+.recap-highlights {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 16px;
+}
+
+.recap-item {
+    display: flex;
+    gap: 12px;
+    padding: 12px;
+    background: white;
+}
+
+.recap-item i {
+    font-size: 20px;
+    color: #0f62fe;
+    flex-shrink: 0;
+    margin-top: 2px;
+}
+
+.recap-item-content {
+    flex: 1;
+}
+
+.recap-item-content strong {
+    display: block;
+    margin-bottom: 4px;
+    color: #161616;
+    font-size: 14px;
+}
+
+.recap-item-content p {
+    margin: 0;
+    color: #525252;
+    font-size: 13px;
+    line-height: 1.5;
+}
+
+/* Cost Breakdown - Natural Language */
+.cost-breakdown-natural {
+    margin-bottom: 24px;
+}
+
+.cost-section-natural {
+    background: white;
+    margin-bottom: 16px;
+    overflow: hidden;
+}
+
+.cost-section-header {
+    display: grid;
+    grid-template-columns: auto 1fr auto;
+    gap: 16px;
+    padding: 20px;
+    background: #f4f4f4;
+    align-items: start;
+}
+
+.cost-section-icon {
+    width: 48px;
+    height: 48px;
+    background: #0f62fe;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+}
+
+.cost-section-icon i {
+    font-size: 24px;
+    color: white;
+}
+
+.cost-section-info {
+    min-width: 0;
+}
+
+.cost-section-info h4 {
+    margin: 0 0 8px 0;
+    font-size: 16px;
+    color: #161616;
+}
+
+.cost-section-info p {
+    margin: 0;
+    color: #525252;
+    font-size: 14px;
+    line-height: 1.5;
+}
+
+/* Simple header without total cost */
+.cost-section-header-simple {
+    display: grid;
+    grid-template-columns: auto 1fr;
+    gap: 16px;
+    padding: 20px;
+    background: #f4f4f4;
+    align-items: start;
+}
+
+/* Work items without pricing */
+.work-item-simple {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 10px 0;
+    border-bottom: 1px solid #e0e0e0;
+}
+
+.work-item-simple:last-child {
+    border-bottom: none;
+}
+
+.work-item-simple i {
+    font-size: 16px;
+    color: #24a148;
+    flex-shrink: 0;
+}
+
+.work-item-simple span {
+    color: #525252;
+    font-size: 14px;
+    line-height: 1.6;
+}
+
+.cost-section-total {
+    font-size: 20px;
+    font-weight: 600;
+    color: #0f62fe;
+    white-space: nowrap;
+}
+
+.cost-section-items {
+    padding: 16px 20px;
+    background: white;
+}
+
+.cost-item-natural {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 12px 0;
+    border-bottom: 1px solid #e0e0e0;
+}
+
+.cost-item-natural:last-child {
+    border-bottom: none;
+}
+
+.cost-item-name {
+    color: #525252;
+    font-size: 14px;
+}
+
+.cost-item-amount {
+    color: #161616;
+    font-weight: 500;
+    font-size: 14px;
+}
+
 .summary-section,
-.quote-section,
-.timeline-estimate {
+.quote-section {
+    margin-bottom: 2rem;
+}
+
+/* Timeline & Payment Combined Section */
+.timeline-payment-section {
+    display: grid;
+    grid-template-columns: 1fr 400px;
+    gap: 24px;
+    margin-bottom: 24px;
+    background: white;
+    overflow: hidden;
+}
+
+/* Timeline Info (Left) */
+.timeline-info {
+    padding: 24px;
+    background: #f4f4f4;
+}
+
+.timeline-header {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin-bottom: 20px;
+}
+
+.timeline-header i {
+    font-size: 24px;
+    color: #0f62fe;
+}
+
+.timeline-header h3 {
+    margin: 0;
+    font-size: 18px;
+    color: #161616;
+    font-weight: 600;
+}
+
+.timeline-duration {
+    text-align: center;
+    padding: 24px 0;
+    margin-bottom: 20px;
+}
+
+.duration-number {
+    font-size: 64px;
+    font-weight: 700;
+    color: #0f62fe;
+    line-height: 1;
+}
+
+.duration-label {
+    font-size: 16px;
+    color: #525252;
+    margin-top: 8px;
+    font-weight: 500;
+}
+
+.timeline-breakdown {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+
+.timeline-step {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 12px;
+    background: white;
+}
+
+.timeline-step-icon {
+    width: 40px;
+    height: 40px;
+    background: #0f62fe;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+}
+
+.timeline-step-icon i {
+    font-size: 18px;
+    color: white;
+}
+
+.timeline-step-info {
+    flex: 1;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.timeline-step-info strong {
+    font-size: 14px;
+    color: #161616;
+}
+
+.timeline-step-info span {
+    font-size: 13px;
+    color: #525252;
+    font-weight: 500;
+}
+
+/* Payment Summary (Right - Shop Style) */
+.payment-summary-box {
+    background: #ffffff;
+    display: flex;
+    flex-direction: column;
+    border-left: 1px solid #e0e0e0;
+}
+
+.payment-header {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 20px 24px;
+    background: #161616;
+    color: white;
+}
+
+.payment-header i {
+    font-size: 20px;
+}
+
+.payment-header h3 {
+    margin: 0;
+    font-size: 16px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.payment-breakdown {
+    padding: 24px;
+    flex: 1;
+}
+
+.payment-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 12px 0;
+}
+
+.payment-item span:first-child {
+    font-size: 14px;
+    color: #525252;
+}
+
+.payment-item .amount {
+    font-size: 16px;
+    font-weight: 600;
+    color: #161616;
+}
+
+.payment-item.subtotal .amount {
+    color: #0f62fe;
+    font-size: 18px;
+}
+
+/* Payment Summary - Simplified */
+.payment-item-large {
+    padding: 24px 0;
+}
+
+.payment-free {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    padding: 20px;
+    background: linear-gradient(135deg, #defbe6 0%, #a7f0ba 100%);
+    color: #0e6027;
+}
+
+.payment-free i {
+    font-size: 48px;
+}
+
+.payment-free-text {
+    flex: 1;
+}
+
+.free-label {
+    font-size: 24px;
+    font-weight: 700;
+    margin-bottom: 4px;
+}
+
+.free-desc {
+    font-size: 14px;
+    opacity: 0.8;
+}
+
+.payment-required {
+    text-align: center;
+    padding: 20px;
+}
+
+.payment-label {
+    font-size: 14px;
+    color: #525252;
+    margin-bottom: 12px;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.payment-amount {
+    font-size: 36px;
+    font-weight: 700;
+    color: #da1e28;
+    margin-bottom: 12px;
+}
+
+.payment-note {
+    font-size: 12px;
+    color: #8d8d8d;
+    padding-top: 12px;
+    border-top: 1px dashed #e0e0e0;
+}
+
+.payment-status.warning {
+    background: #fff3cd;
+    color: #856404;
+}
+
+/* Step actions left aligned */
+.step-actions-left {
+    display: flex;
+    gap: 12px;
+    justify-content: flex-start;
+    align-items: center;
+}
+
+/* Payment methods in modal */
+.payment-methods {
+    margin: 20px 0;
+}
+
+.payment-methods h4 {
+    font-size: 14px;
+    color: #161616;
+    margin-bottom: 12px;
+}
+
+.payment-method-btn {
+    width: 100%;
+    padding: 16px;
+    margin-bottom: 8px;
+    border: 2px solid #e0e0e0;
+    background: white;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    font-size: 14px;
+    transition: all 0.2s ease;
+}
+
+.payment-method-btn:hover {
+    border-color: #0f62fe;
+    background: #f4f4f4;
+}
+
+.payment-method-btn i {
+    font-size: 20px;
+    color: #0f62fe;
+}
+
+.payment-item.credit-info {
+    padding-bottom: 4px;
+}
+
+.payment-item.credit-info span:first-child {
+    font-size: 13px;
+    color: #525252;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.payment-item.credit-info .credit-amount {
+    font-size: 24px;
+    font-weight: 700;
+    color: #0f62fe;
+}
+
+.payment-item.budget .amount.positive {
+    color: #24a148;
+}
+
+.payment-item.balance {
+    margin-top: 8px;
+}
+
+.payment-item.balance .balance-label {
+    font-size: 15px;
+    font-weight: 600;
+    color: #161616;
+}
+
+.payment-item.balance .balance-amount {
+    font-size: 20px;
+    font-weight: 700;
+}
+
+.payment-item.balance .balance-amount.positive {
+    color: #24a148;
+}
+
+.payment-item.balance .balance-amount.negative {
+    color: #da1e28;
+}
+
+.payment-divider {
+    height: 1px;
+    background: #e0e0e0;
+    margin: 8px 0;
+}
+
+.payment-divider-dashed {
+    height: 1px;
+    background: linear-gradient(to right, #e0e0e0 50%, transparent 50%);
+    background-size: 8px 1px;
+    margin: 8px 0;
+}
+
+.payment-status {
+    margin: 0 24px 24px 24px;
+    padding: 16px;
+    text-align: center;
+    font-size: 14px;
+    font-weight: 600;
+    transition: all 0.3s ease;
+}
+
+.payment-status.success {
+    background: #defbe6;
+    color: #24a148;
+}
+
+.payment-status.danger {
+    background: #fff1f1;
+    color: #da1e28;
+}
+
+.payment-status i {
+    margin-right: 8px;
+}
+
+.summary-section,
+.quote-section {
     margin-bottom: 2rem;
 }
 
@@ -2272,6 +2818,30 @@ body {
     outline: none;
     border-bottom-color: var(--primary-color);
     border-bottom-width: 2px;
+}
+
+/* Credit topup info */
+.credit-topup-info {
+    background: #f4f4f4;
+    padding: 16px;
+    margin: 16px 0;
+}
+
+.credit-topup-info .info-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.credit-topup-info .info-item span {
+    color: #525252;
+    font-size: 14px;
+}
+
+.credit-topup-info .info-item strong {
+    color: #da1e28;
+    font-size: 18px;
+    font-weight: 600;
 }
 
 .modal-actions {

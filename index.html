@@ -141,7 +141,7 @@
             <div class="step-number">
               <i class="fas fa-calculator"></i>
             </div>
-            <div class="step-label">Xem giá & Xác nhận</div>
+            <div class="step-label">Xác nhận & thanh toán</div>
             <div class="step-desc">Kiểm tra chi phí dự án</div>
           </div>
           <div class="step-line"></div>
@@ -266,133 +266,99 @@
 
           <!-- Step 2: Tóm tắt & Báo giá -->
           <div class="step-panel" id="step2">
-            <h2><i class="fas fa-calculator"></i> Chi phí & Xác nhận</h2>
+            <h2><i class="fas fa-wallet"></i> Báo giá dự án của bạn</h2>
+            <p class="step-description">
+              Dựa trên những thông tin bạn chia sẻ, đây là chi phí ước tính để
+              biến ý tưởng của bạn thành hiện thực.
+            </p>
 
-            <div class="summary-section">
-              <h3>Những tính năng bạn sẽ có</h3>
+            <!-- Project Summary Recap -->
+            <div class="project-recap" id="projectRecap">
+              <div class="recap-header">
+                <i class="fas fa-info-circle"></i>
+                <h3>Tóm tắt dự án</h3>
+              </div>
+              <div class="recap-content" id="recapContent">
+                <!-- Will be filled from Step 1 summary -->
+              </div>
+            </div>
+
+            <!-- Work Breakdown by Summary Sections -->
+            <div class="cost-breakdown-natural">
+              <h3><i class="fas fa-tasks"></i> Chúng tôi sẽ làm gì cho bạn</h3>
               <p class="section-desc">
-                Dựa trên thông tin bạn cung cấp, website của bạn sẽ bao gồm:
+                Dựa trên yêu cầu của bạn, chúng tôi sẽ thực hiện các công việc
+                sau:
               </p>
-              <div class="features-list" id="featuresList">
-                <!-- Features will be added here dynamically -->
+
+              <div class="cost-sections" id="costSections">
+                <!-- Cost sections will be generated based on summary -->
               </div>
             </div>
 
-            <div class="quote-section">
-              <h3>Chi phí chi tiết</h3>
-
-              <!-- UI/UX Design Breakdown -->
-              <div class="quote-category">
-                <div class="category-header">
-                  <i class="fas fa-palette"></i>
-                  <span>Thiết kế giao diện (UI/UX)</span>
+            <!-- Timeline & Payment Summary Combined -->
+            <div class="timeline-payment-section">
+              <!-- Left: Timeline -->
+              <div class="timeline-info">
+                <div class="timeline-header">
+                  <i class="fas fa-clock"></i>
+                  <h3>Thời gian thực hiện</h3>
                 </div>
-                <div class="category-items" id="uiuxItems">
-                  <!-- UI/UX items will be added here -->
+                <div class="timeline-duration">
+                  <div class="duration-number">3</div>
+                  <div class="duration-label">ngày làm việc</div>
                 </div>
-              </div>
-
-              <!-- Features Breakdown -->
-              <div class="quote-category">
-                <div class="category-header">
-                  <i class="fas fa-cogs"></i>
-                  <span>Các tính năng chính</span>
-                </div>
-                <div class="category-items" id="featuresItems">
-                  <!-- Feature items will be added here -->
-                </div>
-              </div>
-
-              <!-- Integration -->
-              <div class="quote-category">
-                <div class="category-header">
-                  <i class="fas fa-plug"></i>
-                  <span>Tích hợp bên thứ 3</span>
-                </div>
-                <div class="category-items" id="integrationItems">
-                  <!-- Integration items will be added here -->
+                <div class="timeline-breakdown">
+                  <div class="timeline-step">
+                    <div class="timeline-step-icon">
+                      <i class="fas fa-robot"></i>
+                    </div>
+                    <div class="timeline-step-info">
+                      <strong>AI thiết kế & phát triển</strong>
+                      <span>2 ngày</span>
+                    </div>
+                  </div>
+                  <div class="timeline-step">
+                    <div class="timeline-step-icon">
+                      <i class="fas fa-check-double"></i>
+                    </div>
+                    <div class="timeline-step-info">
+                      <strong>Kiểm tra & triển khai</strong>
+                      <span>1 ngày</span>
+                    </div>
+                  </div>
                 </div>
               </div>
 
-              <!-- Testing & Deployment -->
-              <div class="quote-category">
-                <div class="category-header">
-                  <i class="fas fa-check-circle"></i>
-                  <span>Kiểm tra & Triển khai</span>
+              <!-- Right: Payment Summary (Simple) -->
+              <div class="payment-summary-box">
+                <div class="payment-header">
+                  <i class="fas fa-coins"></i>
+                  <h3>Thanh toán</h3>
                 </div>
-                <div class="category-items" id="testingItems">
-                  <!-- Testing items will be added here -->
-                </div>
-              </div>
 
-              <!-- Additional Features (if any) -->
-              <div
-                class="quote-category"
-                id="additionalCategory"
-                style="display: none"
-              >
-                <div class="category-header">
-                  <i class="fas fa-plus-circle"></i>
-                  <span>Tính năng phát sinh</span>
+                <div class="payment-breakdown">
+                  <div class="payment-item-large" id="paymentDisplay">
+                    <!-- Will show either "Miễn phí" or amount to pay -->
+                  </div>
                 </div>
-                <div class="category-items" id="additionalItems">
-                  <!-- Additional items will be added here -->
-                </div>
-              </div>
 
-              <!-- Total Summary -->
-              <div class="quote-summary">
-                <div class="summary-row">
-                  <span class="summary-label">Tổng chi phí dự án:</span>
-                  <span class="summary-value" id="totalCost">0 đ</span>
-                </div>
-                <div class="summary-row budget-row">
-                  <span class="summary-label">Ngân sách hiện tại của bạn:</span>
-                  <span class="summary-value" id="currentBudget">0 đ</span>
-                </div>
-                <div class="summary-row balance-row" id="balanceRow">
-                  <span class="summary-label">Còn lại sau dự án:</span>
-                  <span class="summary-value balance-value" id="remainingBudget"
-                    >0 đ</span
-                  >
-                </div>
-                <div class="summary-row status-row" id="statusRow">
-                  <span class="summary-label">Trạng thái:</span>
-                  <span class="summary-value status-badge" id="budgetStatus">
-                    <i class="fas fa-spinner fa-spin"></i> Đang tính toán...
-                  </span>
+                <div class="payment-status" id="budgetStatus">
+                  <i class="fas fa-spinner fa-spin"></i> Đang tính toán...
                 </div>
               </div>
             </div>
 
-            <div class="timeline-estimate">
-              <div class="estimate-card">
-                <div class="estimate-icon">
-                  <i class="fas fa-calendar-alt"></i>
-                </div>
-                <div class="estimate-content">
-                  <h4>Thời gian hoàn thiện dự kiến</h4>
-                  <p class="estimate-time" id="estimatedTime">
-                    <strong>6-8 tuần</strong>
-                    <span class="estimate-breakdown" id="timeBreakdown">
-                      Thiết kế (2 tuần) + Phát triển (4 tuần) + Kiểm tra (1-2
-                      tuần)
-                    </span>
-                  </p>
-                </div>
-              </div>
-            </div>
-
-            <div class="step-actions">
-              <button
-                class="btn-secondary"
-                id="addBudgetBtn"
-                style="display: none"
-              >
-                <i class="fas fa-wallet"></i> Nạp thêm ngân sách
-              </button>
+            <div class="step-actions step-actions-left">
               <button class="btn-primary" id="proceedBtn" disabled>
                 <i class="fas fa-hammer"></i> Xác nhận & Bắt đầu thi công
+              </button>
+              <button
+                class="btn-secondary"
+                id="addCreditBtn"
+                style="display: none"
+              >
+                <i class="fas fa-wallet"></i> Thanh toán ngay
               </button>
             </div>
           </div>
@@ -664,20 +630,35 @@
       </div>
     </div>
 
-    <!-- Modal for Budget Top-up -->
-    <div class="modal" id="budgetModal">
+    <!-- Modal for Payment -->
+    <div class="modal" id="creditModal">
       <div class="modal-content">
         <span class="close-modal">&times;</span>
-        <h2><i class="fas fa-wallet"></i> Nạp thêm ngân sách</h2>
-        <p>Vui lòng nhập số tiền cần nạp thêm:</p>
-        <input
-          type="number"
-          id="topupAmount"
-          placeholder="Nhập số tiền (VNĐ)"
-        />
+        <h2><i class="fas fa-credit-card"></i> Thanh toán dự án</h2>
+        <p>Vui lòng thanh toán để bắt đầu thi công dự án:</p>
+        <div class="credit-topup-info">
+          <div class="info-item">
+            <span>Số tiền cần thanh toán:</span>
+            <strong id="creditNeeded">0 đ</strong>
+          </div>
+        </div>
+        <div class="payment-methods">
+          <h4>Chọn phương thức thanh toán:</h4>
+          <button class="payment-method-btn">
+            <i class="fas fa-credit-card"></i> Thẻ tín dụng/Ghi nợ
+          </button>
+          <button class="payment-method-btn">
+            <i class="fas fa-mobile-alt"></i> Ví điện tử (Momo, ZaloPay)
+          </button>
+          <button class="payment-method-btn">
+            <i class="fas fa-university"></i> Chuyển khoản ngân hàng
+          </button>
+        </div>
         <div class="modal-actions">
           <button class="btn-secondary" id="cancelTopup">Hủy</button>
-          <button class="btn-primary" id="confirmTopup">Xác nhận</button>
+          <button class="btn-primary" id="confirmTopup">
+            Xác nhận thanh toán
+          </button>
         </div>
       </div>
     </div>

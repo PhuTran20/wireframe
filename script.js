@@ -3,7 +3,7 @@ const appState = {
     currentStep: 1,
     isRecording: false,
     qaData: [],
-    budget: 50000000, // 50 triệu VNĐ
+    credit: 50000000, // 50 triệu VNĐ credit ban đầu
     totalCost: 0,
     features: [],
     chatHistory: [],
@@ -123,257 +123,304 @@ const voiceStatus = document.getElementById('voiceStatus');
 const chatMessages = document.getElementById('chatMessages');
 const accountBtn = document.getElementById('accountBtn');
 const dropdownMenu = document.getElementById('dropdownMenu');
-const budgetModal = document.getElementById('budgetModal');
-const addBudgetBtn = document.getElementById('addBudgetBtn');
-const proceedBtn = document.getElementById('proceedBtn');
 const toggleChatBtn = document.getElementById('toggleChatBtn');
 const floatingChatBtn = document.getElementById('floatingChatBtn');
 const leftColumn = document.getElementById('leftColumn');
 
-// Initialize Application
-document.addEventListener('DOMContentLoaded', () => {
-    initializeEventListeners();
-    initializeNavigation();
-    loadStep1Questions();
-});
-
-// Event Listeners
-function initializeEventListeners() {
-    // Header
-    accountBtn.addEventListener('click', toggleDropdown);
-    
-    // Voice Recording
-    micBtn.addEventListener('click', toggleRecording);
-    
-    // Chat Panel Toggle
-    toggleChatBtn.addEventListener('click', toggleChatPanel);
-    floatingChatBtn.addEventListener('click', toggleChatPanel);
-    
-    // Step Navigation
-    document.getElementById('nextStep1')?.addEventListener('click', () => goToStep(2));
-    document.getElementById('nextStep3')?.addEventListener('click', () => goToStep(4));
-    document.getElementById('nextStep4')?.addEventListener('click', () => goToStep(5));
-    document.getElementById('proceedBtn')?.addEventListener('click', startConstruction);
-    document.getElementById('addBudgetBtn')?.addEventListener('click', openBudgetModal);
-    document.getElementById('deployBtn')?.addEventListener('click', deployWebsite);
-    document.getElementById('submitCommentBtn')?.addEventListener('click', submitComment);
-    
-    // Step indicator clicks - allow going back to completed steps
-    document.querySelectorAll('.step').forEach((stepEl, index) => {
-        stepEl.addEventListener('click', () => {
-            const stepNumber = index + 1;
-            // Allow clicking if step is completed or is the current step
-            if (stepEl.classList.contains('completed') || stepEl.classList.contains('active')) {
-                goToStep(stepNumber);
-            }
-        });
-    });
-    
-    // Modal
-    document.querySelector('.close-modal')?.addEventListener('click', closeBudgetModal);
-    document.getElementById('cancelTopup')?.addEventListener('click', closeBudgetModal);
-    document.getElementById('confirmTopup')?.addEventListener('click', confirmTopup);
-    
-    // Preview Tabs
-    document.querySelectorAll('.tab-btn').forEach(btn => {
-        btn.addEventListener('click', (e) => switchPreviewTab(e.target.dataset.tab));
-    });
-    
-    // Close dropdown when clicking outside
-    document.addEventListener('click', (e) => {
-        if (!accountBtn.contains(e.target) && !dropdownMenu.contains(e.target)) {
-            dropdownMenu.classList.remove('show');
-        }
-    });
-}
-
-function initializeNavigation() {
-    // Initially show step 1
-    document.getElementById('step1').classList.add('active');
-    document.querySelector('.step').classList.add('active');
-}
-
 // Step 2 Functions
 function loadStep2Data() {
-    // 1. Load features list
-    const featuresList = document.getElementById('featuresList');
-    featuresList.innerHTML = '';
+    // 1. Load project recap from Step 1 summary
+    loadProjectRecap();
     
-    projectFeatures.forEach(feature => {
-        const card = document.createElement('div');
-        card.className = 'feature-card';
-        card.innerHTML = `
-            <div class="feature-card-header">
-                <div class="feature-icon">
-                    <i class="fas ${feature.icon}"></i>
+    // 2. Load cost breakdown based on summary sections
+    loadCostBreakdown();
+    
+    // 3. Update credit summary
+    updateCreditSummary();
+}
+
+function loadProjectRecap() {
+    const recapContent = document.getElementById('recapContent');
+    const naturalSummary = generateNaturalLanguageSummary();
+    
+    recapContent.innerHTML = `
+        <div class="recap-intro">
+            <p>${naturalSummary.intro}</p>
+        </div>
+        <div class="recap-highlights">
+            ${naturalSummary.sections.slice(0, 2).map(section => `
+                <div class="recap-item">
+                    <i class="${section.icon}"></i>
+                    <div class="recap-item-content">
+                        <strong>${section.title}</strong>
+                        <p>${section.content}</p>
+                    </div>
                 </div>
-                <div class="feature-name">${feature.name}</div>
-            </div>
-            <div class="feature-description">${feature.description}</div>
-            <div class="feature-meta">
-                <span class="feature-time">
-                    <i class="far fa-clock"></i> ${feature.duration}
-                </span>
-                <span class="feature-cost">${formatCurrency(feature.cost)}</span>
-            </div>
-        `;
-        featuresList.appendChild(card);
-    });
-    
-    // 2. Load UI/UX breakdown
-    const uiuxItems = document.getElementById('uiuxItems');
-    uiuxItems.innerHTML = '';
-    let uiuxTotal = 0;
-    
-    uiuxPages.forEach(page => {
-        const item = document.createElement('div');
-        item.className = 'quote-item';
-        item.innerHTML = `
-            <div class="quote-item-info">
-                <div class="quote-item-name">${page.name}</div>
-                <div class="quote-item-desc">${page.description}</div>
-            </div>
-            <div class="quote-item-price">${formatCurrency(page.cost)}</div>
-        `;
-        uiuxItems.appendChild(item);
-        uiuxTotal += page.cost;
-    });
-    
-    // 3. Load features breakdown
-    const featuresItems = document.getElementById('featuresItems');
-    featuresItems.innerHTML = '';
-    let featuresTotal = 0;
-    
-    projectFeatures.forEach(feature => {
-        const item = document.createElement('div');
-        item.className = 'quote-item';
-        item.innerHTML = `
-            <div class="quote-item-info">
-                <div class="quote-item-name">${feature.name}</div>
-                <div class="quote-item-desc">${feature.description}</div>
-            </div>
-            <div class="quote-item-price">${formatCurrency(feature.cost)}</div>
-        `;
-        featuresItems.appendChild(item);
-        featuresTotal += feature.cost;
-    });
-    
-    // 4. Load integration services
-    const integrationItems = document.getElementById('integrationItems');
-    integrationItems.innerHTML = '';
-    let integrationTotal = 0;
-    
-    integrationServices.forEach(service => {
-        const item = document.createElement('div');
-        item.className = 'quote-item';
-        item.innerHTML = `
-            <div class="quote-item-info">
-                <div class="quote-item-name">${service.name}</div>
-                <div class="quote-item-desc">${service.description}</div>
-            </div>
-            <div class="quote-item-price">${formatCurrency(service.cost)}</div>
-        `;
-        integrationItems.appendChild(item);
-        integrationTotal += service.cost;
-    });
-    
-    // 5. Load testing & deployment
-    const testingItems = document.getElementById('testingItems');
-    testingItems.innerHTML = '';
-    let testingTotal = 0;
-    
-    testingDeployment.forEach(item_data => {
-        const item = document.createElement('div');
-        item.className = 'quote-item';
-        item.innerHTML = `
-            <div class="quote-item-info">
-                <div class="quote-item-name">${item_data.name}</div>
-                <div class="quote-item-desc">${item_data.description}</div>
-            </div>
-            <div class="quote-item-price">${formatCurrency(item_data.cost)}</div>
-        `;
-        testingItems.appendChild(item);
-        testingTotal += item_data.cost;
-    });
-    
-    // 6. Calculate total cost
-    appState.totalCost = uiuxTotal + featuresTotal + integrationTotal + testingTotal;
-    
-    // 7. Update summary
-    document.getElementById('totalCost').textContent = formatCurrency(appState.totalCost);
-    document.getElementById('currentBudget').textContent = formatCurrency(appState.budget);
-    
-    const remainingBudget = appState.budget - appState.totalCost;
-    const remainingElement = document.getElementById('remainingBudget');
-    const balanceRow = document.getElementById('balanceRow');
-    
-    remainingElement.textContent = formatCurrency(Math.abs(remainingBudget));
-    
-    if (remainingBudget >= 0) {
-        remainingElement.classList.add('positive');
-        remainingElement.classList.remove('negative');
-        balanceRow.querySelector('.summary-label').textContent = 'Còn lại sau dự án:';
-    } else {
-        remainingElement.classList.add('negative');
-        remainingElement.classList.remove('positive');
-        balanceRow.querySelector('.summary-label').textContent = 'Thiếu để thực hiện dự án:';
-    }
-    
-    // 8. Update status badge
-    const budgetStatus = document.getElementById('budgetStatus');
-    const statusRow = document.getElementById('statusRow');
-    const proceedBtn = document.getElementById('proceedBtn');
-    const addBudgetBtn = document.getElementById('addBudgetBtn');
-    
-    if (remainingBudget >= 0) {
-        budgetStatus.innerHTML = '<i class="fas fa-check-circle"></i> Đủ ngân sách, sẵn sàng thi công';
-        budgetStatus.className = 'summary-value status-badge success';
-        proceedBtn.disabled = false;
-        addBudgetBtn.style.display = 'none';
-    } else {
-        budgetStatus.innerHTML = '<i class="fas fa-exclamation-triangle"></i> Cần nạp thêm ngân sách';
-        budgetStatus.className = 'summary-value status-badge danger';
-        proceedBtn.disabled = true;
-        addBudgetBtn.style.display = 'inline-flex';
-    }
-    
-    // 9. Update timeline
-    document.getElementById('estimatedTime').innerHTML = `
-        <strong>3 ngày</strong>
-        <span class="estimate-breakdown">
-            AI thiết kế & phát triển toàn bộ website (2 ngày) → Kiểm tra & Triển khai (1 ngày)
-        </span>
+            `).join('')}
+        </div>
     `;
+}
+
+function loadCostBreakdown() {
+    const costSections = document.getElementById('costSections');
+    const qaData = appState.qaData;
+    
+    // Generate cost items based on user's answers
+    const websiteType = qaData[0]?.answer || 'website';
+    const features = qaData[1]?.answer || 'các tính năng cơ bản';
+    const design = qaData[2]?.answer || 'giao diện đẹp mắt';
+    const integration = qaData[3]?.answer || 'các hệ thống cần thiết';
+    
+    // Parse features to estimate cost
+    const featuresList = features.split(',').map(f => f.trim().toLowerCase());
+    
+    const costData = [
+        {
+            icon: 'fas fa-lightbulb',
+            title: 'Lập kế hoạch & Phân tích',
+            description: `Chúng tôi sẽ phân tích yêu cầu cho ${websiteType}, lên kế hoạch chi tiết và thiết kế kiến trúc hệ thống phù hợp.`,
+            items: [
+                { name: 'Phân tích yêu cầu dự án', cost: 2000000 },
+                { name: 'Thiết kế kiến trúc hệ thống', cost: 3000000 },
+                { name: 'Lập kế hoạch phát triển', cost: 1500000 }
+            ]
+        },
+        {
+            icon: 'fas fa-paint-brush',
+            title: 'Thiết kế giao diện',
+            description: `Tạo giao diện ${design} với trải nghiệm người dùng tối ưu trên mọi thiết bị.`,
+            items: generateDesignCosts(websiteType)
+        },
+        {
+            icon: 'fas fa-cogs',
+            title: 'Phát triển tính năng',
+            description: `Xây dựng các tính năng: ${features.substring(0, 100)}${features.length > 100 ? '...' : ''}.`,
+            items: generateFeatureCosts(featuresList)
+        },
+        {
+            icon: 'fas fa-plug',
+            title: 'Tích hợp hệ thống',
+            description: `Kết nối website với ${integration} để hệ thống hoạt động trơn tru.`,
+            items: generateIntegrationCosts(integration)
+        },
+        {
+            icon: 'fas fa-check-double',
+            title: 'Kiểm tra & Triển khai',
+            description: 'Đảm bảo website hoạt động ổn định, bảo mật và đưa lên internet để mọi người truy cập.',
+            items: [
+                { name: 'Kiểm tra chức năng toàn diện', cost: 3000000 },
+                { name: 'Kiểm tra bảo mật', cost: 2000000 },
+                { name: 'Tối ưu hiệu suất', cost: 2000000 },
+                { name: 'Triển khai lên server', cost: 3000000 }
+            ]
+        }
+    ];
+    
+    let totalCost = 0;
+    
+    costSections.innerHTML = costData.map(section => {
+        const sectionTotal = section.items.reduce((sum, item) => sum + item.cost, 0);
+        totalCost += sectionTotal;
+        
+        return `
+            <div class="cost-section-natural">
+                <div class="cost-section-header-simple">
+                    <div class="cost-section-icon">
+                        <i class="${section.icon}"></i>
+                    </div>
+                    <div class="cost-section-info">
+                        <h4>${section.title}</h4>
+                        <p>${section.description}</p>
+                    </div>
+                </div>
+                <div class="cost-section-items">
+                    ${section.items.map(item => `
+                        <div class="work-item-simple">
+                            <i class="fas fa-check-circle"></i>
+                            <span>${item.name}</span>
+                        </div>
+                    `).join('')}
+                </div>
+            </div>
+        `;
+    }).join('');
+    
+    appState.totalCost = totalCost;
+}
+
+function generateDesignCosts(websiteType) {
+    const isEcommerce = websiteType.toLowerCase().includes('commerce') || 
+                        websiteType.toLowerCase().includes('bán hàng');
+    
+    const baseCosts = [
+        { name: 'Thiết kế trang chủ', cost: 3000000 },
+        { name: 'Thiết kế các trang nội dung', cost: 2500000 },
+        { name: 'Thiết kế responsive (mobile, tablet)', cost: 2000000 }
+    ];
+    
+    if (isEcommerce) {
+        baseCosts.push(
+            { name: 'Thiết kế trang sản phẩm', cost: 2500000 },
+            { name: 'Thiết kế giỏ hàng & thanh toán', cost: 3000000 }
+        );
+    }
+    
+    return baseCosts;
+}
+
+function generateFeatureCosts(featuresList) {
+    const costs = [];
+    const featureText = featuresList.join(' ');
+    
+    // Check for common features and add costs
+    if (featureText.includes('giỏ hàng') || featureText.includes('cart')) {
+        costs.push({ name: 'Giỏ hàng thông minh', cost: 8000000 });
+    }
+    
+    if (featureText.includes('thanh toán') || featureText.includes('payment')) {
+        costs.push({ name: 'Hệ thống thanh toán online', cost: 10000000 });
+    }
+    
+    if (featureText.includes('đơn hàng') || featureText.includes('order')) {
+        costs.push({ name: 'Quản lý đơn hàng', cost: 9000000 });
+    }
+    
+    if (featureText.includes('tìm kiếm') || featureText.includes('search')) {
+        costs.push({ name: 'Tìm kiếm & lọc sản phẩm', cost: 7000000 });
+    }
+    
+    if (featureText.includes('đánh giá') || featureText.includes('review')) {
+        costs.push({ name: 'Hệ thống đánh giá', cost: 5000000 });
+    }
+    
+    if (featureText.includes('yêu thích') || featureText.includes('wishlist')) {
+        costs.push({ name: 'Danh sách yêu thích', cost: 4000000 });
+    }
+    
+    // Add default if no features detected
+    if (costs.length === 0) {
+        costs.push(
+            { name: 'Các tính năng cơ bản', cost: 15000000 },
+            { name: 'Quản lý nội dung', cost: 8000000 }
+        );
+    }
+    
+    return costs;
+}
+
+function generateIntegrationCosts(integration) {
+    const costs = [];
+    const integrationText = integration.toLowerCase();
+    
+    if (integrationText.includes('vnpay')) {
+        costs.push({ name: 'Tích hợp VNPay', cost: 3000000 });
+    }
+    
+    if (integrationText.includes('momo')) {
+        costs.push({ name: 'Tích hợp Momo', cost: 3000000 });
+    }
+    
+    if (integrationText.includes('facebook') || integrationText.includes('pixel')) {
+        costs.push({ name: 'Facebook Pixel & Marketing', cost: 2000000 });
+    }
+    
+    if (integrationText.includes('google') || integrationText.includes('analytics')) {
+        costs.push({ name: 'Google Analytics', cost: 1500000 });
+    }
+    
+    if (integrationText.includes('email') || integrationText.includes('mailchimp')) {
+        costs.push({ name: 'Email Marketing', cost: 2500000 });
+    }
+    
+    // Add default if no integrations detected
+    if (costs.length === 0) {
+        costs.push({ name: 'Tích hợp cơ bản', cost: 5000000 });
+    }
+    
+    return costs;
+}
+
+function updateCreditSummary() {
+    const freeCredit = appState.credit; // Credit miễn phí ban đầu
+    const projectCost = appState.totalCost;
+    const amountToPay = Math.max(0, projectCost - freeCredit); // Số tiền cần trả
+    
+    const paymentDisplay = document.getElementById('paymentDisplay');
+    const budgetStatus = document.getElementById('budgetStatus');
+    const proceedBtn = document.getElementById('proceedBtn');
+    const addCreditBtn = document.getElementById('addCreditBtn');
+    
+    // Hiển thị số tiền cần trả hoặc miễn phí
+    if (amountToPay === 0) {
+        // Dự án nằm trong gói miễn phí
+        paymentDisplay.innerHTML = `
+            <div class="payment-free">
+                <i class="fas fa-gift"></i>
+                <div class="payment-free-text">
+                    <div class="free-label">Miễn phí</div>
+                    <div class="free-desc">Dự án này nằm trong gói miễn phí của bạn</div>
+                </div>
+            </div>
+        `;
+        
+        budgetStatus.innerHTML = '<i class="fas fa-check-circle"></i> Sẵn sàng thi công ngay';
+        budgetStatus.className = 'payment-status success';
+        proceedBtn.disabled = false;
+        addCreditBtn.style.display = 'none';
+    } else {
+        // Cần thanh toán thêm
+        paymentDisplay.innerHTML = `
+            <div class="payment-required">
+                <div class="payment-label">Số tiền cần thanh toán</div>
+                <div class="payment-amount">${formatCurrency(amountToPay)}</div>
+                <div class="payment-note"></div>
+            </div>
+        `;
+        
+        budgetStatus.innerHTML = '<i class="fas fa-credit-card"></i> Vui lòng thanh toán để bắt đầu';
+        budgetStatus.className = 'payment-status warning';
+        proceedBtn.disabled = true;
+        addCreditBtn.style.display = 'inline-flex';
+    }
 }
 
 function formatCurrency(amount) {
     return new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' }).format(amount);
 }
 
-function openBudgetModal() {
-    const budgetModal = document.getElementById('budgetModal');
-    budgetModal.classList.add('show');
+function openCreditModal() {
+    const creditModal = document.getElementById('creditModal');
+    const freeCredit = appState.credit;
+    const projectCost = appState.totalCost;
+    const amountToPay = Math.max(0, projectCost - freeCredit);
+    
+    // Update the amount to pay
+    const creditNeededEl = document.getElementById('creditNeeded');
+    if (creditNeededEl) {
+        creditNeededEl.textContent = formatCurrency(amountToPay);
+    }
+    
+    creditModal.classList.add('show');
 }
 
-function closeBudgetModal() {
-    const budgetModal = document.getElementById('budgetModal');
-    budgetModal.classList.remove('show');
-    const topupAmount = document.getElementById('topupAmount');
-    if (topupAmount) topupAmount.value = '';
+function closeCreditModal() {
+    const creditModal = document.getElementById('creditModal');
+    creditModal.classList.remove('show');
 }
 
 function confirmTopup() {
-    const topupAmount = document.getElementById('topupAmount');
-    const amount = parseInt(topupAmount.value);
+    // Simulate payment success
+    const freeCredit = appState.credit;
+    const projectCost = appState.totalCost;
+    const amountToPay = Math.max(0, projectCost - freeCredit);
     
-    if (amount && amount > 0) {
-        appState.budget += amount;
-        addChatMessage(`Đã nạp thêm ${formatCurrency(amount)} vào tài khoản.`, 'bot');
-        closeBudgetModal();
-        loadStep2Data();
-    } else {
-        alert('Vui lòng nhập số tiền hợp lệ!');
-    }
+    addChatMessage(`Đã thanh toán thành công ${formatCurrency(amountToPay)}. Dự án sẵn sàng thi công!`, 'bot');
+    
+    // Increase credit to cover the project
+    appState.credit = projectCost;
+    
+    closeCreditModal();
+    loadStep2Data();
 }
 
 function startConstruction() {
@@ -407,7 +454,7 @@ function initializeEventListeners() {
     document.getElementById('nextStep3')?.addEventListener('click', () => goToStep(4));
     document.getElementById('nextStep4')?.addEventListener('click', () => goToStep(5));
     document.getElementById('proceedBtn')?.addEventListener('click', startConstruction);
-    document.getElementById('addBudgetBtn')?.addEventListener('click', openBudgetModal);
+    document.getElementById('addCreditBtn')?.addEventListener('click', openCreditModal);
     document.getElementById('deployBtn')?.addEventListener('click', deployWebsite);
     document.getElementById('submitCommentBtn')?.addEventListener('click', submitComment);
     
@@ -423,9 +470,16 @@ function initializeEventListeners() {
         });
     });
     
-    // Modal
-    document.querySelector('.close-modal')?.addEventListener('click', closeBudgetModal);
-    document.getElementById('cancelTopup')?.addEventListener('click', closeBudgetModal);
+    // Modal - Credit topup
+    document.querySelectorAll('.close-modal').forEach(closeBtn => {
+        closeBtn.addEventListener('click', (e) => {
+            const modal = e.target.closest('.modal');
+            if (modal) {
+                modal.classList.remove('show');
+            }
+        });
+    });
+    document.getElementById('cancelTopup')?.addEventListener('click', closeCreditModal);
     document.getElementById('confirmTopup')?.addEventListener('click', confirmTopup);
     
     // Preview Tabs
