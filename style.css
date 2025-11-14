@@ -1844,6 +1844,246 @@ body {
     font-size: 0.875rem;
 }
 
+/* Step 3: Progress & Preview Combined */
+.progress-work-section {
+    margin-bottom: 40px;
+}
+
+.progress-work-section h3 {
+    color: #161616;
+    font-size: 20px;
+    margin-bottom: 24px;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+.work-progress-list {
+    display: flex;
+    flex-direction: column;
+    gap: 24px;
+}
+
+.work-progress-item {
+    background: white;
+    padding: 24px;
+    border-left: 4px solid #e0e0e0;
+    transition: all 0.3s ease;
+}
+
+.work-progress-item:has(.progress-status.active) {
+    border-left-color: #0f62fe;
+}
+
+.work-progress-item:has(.progress-status.completed) {
+    border-left-color: #24a148;
+}
+
+.work-progress-header {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    margin-bottom: 16px;
+}
+
+.work-progress-icon {
+    width: 48px;
+    height: 48px;
+    background: #f4f4f4;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+}
+
+.work-progress-icon i {
+    font-size: 24px;
+    color: #525252;
+}
+
+.work-progress-item:has(.progress-status.active) .work-progress-icon {
+    background: #0f62fe;
+}
+
+.work-progress-item:has(.progress-status.active) .work-progress-icon i {
+    color: white;
+}
+
+.work-progress-item:has(.progress-status.completed) .work-progress-icon {
+    background: #24a148;
+}
+
+.work-progress-item:has(.progress-status.completed) .work-progress-icon i {
+    color: white;
+}
+
+.work-progress-info {
+    flex: 1;
+}
+
+.work-progress-info h4 {
+    margin: 0 0 8px 0;
+    font-size: 16px;
+    color: #161616;
+}
+
+.work-progress-meta {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+}
+
+.progress-status {
+    font-size: 13px;
+    color: #8d8d8d;
+    padding: 4px 12px;
+    background: #f4f4f4;
+    font-weight: 500;
+}
+
+.progress-status.active {
+    background: #d0e2ff;
+    color: #0043ce;
+}
+
+.progress-status.completed {
+    background: #defbe6;
+    color: #0e6027;
+}
+
+.progress-percent {
+    font-size: 14px;
+    font-weight: 600;
+    color: #161616;
+}
+
+.work-progress-bar {
+    height: 8px;
+    background: #e0e0e0;
+    margin-bottom: 16px;
+    overflow: hidden;
+}
+
+.progress-fill {
+    height: 100%;
+    background: linear-gradient(90deg, #0f62fe 0%, #4589ff 100%);
+    transition: width 0.5s ease;
+}
+
+.work-tasks-list {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.work-task-step {
+    display: flex;
+    align-items: flex-start;
+    gap: 12px;
+    padding: 12px 0;
+    border-bottom: 1px solid #f4f4f4;
+}
+
+.work-task-step:last-child {
+    border-bottom: none;
+}
+
+.task-step-number {
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 600;
+    font-size: 14px;
+    flex-shrink: 0;
+    transition: all 0.3s ease;
+}
+
+.task-step-number.pending {
+    background: #f4f4f4;
+    color: #8d8d8d;
+    border: 2px solid #e0e0e0;
+}
+
+.task-step-number.in-progress {
+    background: #0f62fe;
+    color: white;
+    border: 2px solid #0f62fe;
+    animation: pulse 1.5s ease-in-out infinite;
+}
+
+.task-step-number.completed {
+    background: #24a148;
+    color: white;
+    border: 2px solid #24a148;
+}
+
+.task-step-content {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+}
+
+.task-step-name {
+    color: #161616;
+    font-size: 14px;
+    font-weight: 500;
+    line-height: 1.4;
+}
+
+.task-step-status {
+    font-size: 12px;
+    font-weight: 500;
+    display: inline-block;
+}
+
+.task-step-status {
+    color: #8d8d8d;
+}
+
+.task-step-status.in-progress {
+    color: #0f62fe;
+}
+
+.task-step-status.completed {
+    color: #24a148;
+}
+
+@keyframes pulse {
+    0%, 100% {
+        transform: scale(1);
+        box-shadow: 0 0 0 0 rgba(15, 98, 254, 0.4);
+    }
+    50% {
+        transform: scale(1.05);
+        box-shadow: 0 0 0 6px rgba(15, 98, 254, 0);
+    }
+}
+
+/* Preview Section */
+.preview-section {
+    margin-top: 48px;
+    padding-top: 32px;
+    border-top: 2px solid #e0e0e0;
+}
+
+.preview-section h3 {
+    color: #161616;
+    font-size: 20px;
+    margin-bottom: 12px;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+.preview-section .section-desc {
+    color: #525252;
+    margin-bottom: 24px;
+}
+
 /* Features List */
 .features-list {
     display: grid;

@@ -147,21 +147,13 @@
           <div class="step-line"></div>
           <div class="step" data-step="3">
             <div class="step-number">
-              <i class="fas fa-tasks"></i>
+              <i class="fas fa-rocket"></i>
             </div>
-            <div class="step-label">Theo dõi tiến độ</div>
-            <div class="step-desc">Xem quá trình thực hiện</div>
+            <div class="step-label">Tiến độ & Xem thử</div>
+            <div class="step-desc">Theo dõi và kiểm tra</div>
           </div>
           <div class="step-line"></div>
           <div class="step" data-step="4">
-            <div class="step-number">
-              <i class="fas fa-eye"></i>
-            </div>
-            <div class="step-label">Xem thử website</div>
-            <div class="step-desc">Kiểm tra trước khi hoàn tất</div>
-          </div>
-          <div class="step-line"></div>
-          <div class="step" data-step="5">
             <div class="step-number">
               <i class="fas fa-check-circle"></i>
             </div>
@@ -363,85 +355,77 @@
             </div>
           </div>
 
-          <!-- Step 3: Timeline -->
+          <!-- Step 3: Tiến độ & Xem thử -->
           <div class="step-panel" id="step3">
-            <h2><i class="fas fa-tasks"></i> Theo dõi tiến độ làm việc</h2>
+            <h2>
+              <i class="fas fa-rocket"></i> Tiến độ thi công & Xem thử website
+            </h2>
             <p class="step-description">
-              Chúng tôi đang làm việc cho bạn! Xem chi tiết các tính năng đang
-              được thực hiện.
+              Chúng tôi đang làm việc cho bạn! Theo dõi tiến độ và xem kết quả
+              ngay khi hoàn thành.
             </p>
 
-            <div class="progress-container">
-              <!-- Left column: Feature and pages detail -->
-              <div class="progress-left">
-                <div class="feature-pipeline" id="featurePipeline">
-                  <!-- Feature items will be added here -->
-                </div>
-              </div>
-
-              <!-- Right column: Progress visualization -->
-              <div class="progress-right">
-                <div class="progress-summary" id="progressSummary">
-                  <!-- Progress summary will be added here -->
-                </div>
+            <!-- Progress Section -->
+            <div class="progress-work-section">
+              <h3><i class="fas fa-tasks"></i> Tiến độ thực hiện</h3>
+              <div class="work-progress-list" id="workProgressList">
+                <!-- Progress items will be generated from Step 2 data -->
               </div>
             </div>
 
-            <div class="step-actions">
+            <!-- Preview Section (will show after progress completes) -->
+            <div
+              class="preview-section"
+              id="previewSection"
+              style="display: none"
+            >
+              <h3><i class="fas fa-eye"></i> Xem thử website của bạn</h3>
+              <p class="section-desc">
+                Website đã hoàn thành! Hãy xem thử và kiểm tra kỹ trước khi đưa
+                lên internet.
+              </p>
+
+              <div class="preview-tabs" id="previewTabs">
+                <button class="tab-btn active" data-tab="admin">
+                  <i class="fas fa-user-shield"></i> Admin
+                </button>
+                <button class="tab-btn" data-tab="client">
+                  <i class="fas fa-user"></i> Client
+                </button>
+              </div>
+
+              <div class="preview-container">
+                <div class="preview-frame" id="previewFrame">
+                  <div class="preview-placeholder">
+                    <i class="fas fa-desktop"></i>
+                    <p>Preview website của bạn sẽ hiển thị ở đây</p>
+                  </div>
+                </div>
+              </div>
+
+              <div class="comment-section">
+                <h3>
+                  <i class="fas fa-comment-dots"></i> Có điều gì cần chỉnh sửa?
+                </h3>
+                <textarea
+                  id="commentInput"
+                  placeholder="Nhập ý kiến của bạn (nếu có)..."
+                ></textarea>
+                <button class="btn-secondary" id="submitCommentBtn">
+                  <i class="fas fa-paper-plane"></i> Gửi yêu cầu chỉnh sửa
+                </button>
+              </div>
+            </div>
+
+            <div class="step-actions step-actions-left">
               <button class="btn-next" id="nextStep3" disabled>
-                <i class="fas fa-arrow-right"></i> Bước tiếp theo
+                <i class="fas fa-arrow-right"></i> Hoàn thành & Triển khai
               </button>
             </div>
           </div>
 
-          <!-- Step 4: Xem thử website -->
+          <!-- Step 4: Hoàn thành -->
           <div class="step-panel" id="step4">
-            <h2><i class="fas fa-eye"></i> Xem thử website của bạn</h2>
-            <p class="step-description">
-              Website đã hoàn thành! Hãy xem thử và kiểm tra kỹ trước khi đưa
-              lên internet.
-            </p>
-
-            <div class="preview-tabs" id="previewTabs">
-              <button class="tab-btn active" data-tab="admin">
-                <i class="fas fa-user-shield"></i> Admin
-              </button>
-              <button class="tab-btn" data-tab="client">
-                <i class="fas fa-user"></i> Client
-              </button>
-            </div>
-
-            <div class="preview-container">
-              <div class="preview-frame" id="previewFrame">
-                <div class="preview-placeholder">
-                  <i class="fas fa-desktop"></i>
-                  <p>Preview website của bạn sẽ hiển thị ở đây</p>
-                </div>
-              </div>
-            </div>
-
-            <div class="comment-section">
-              <h3>
-                <i class="fas fa-comment-dots"></i> Có điều gì cần chỉnh sửa?
-              </h3>
-              <textarea
-                id="commentInput"
-                placeholder="Nhập ý kiến của bạn (nếu có)..."
-              ></textarea>
-              <button class="btn-secondary" id="submitCommentBtn">
-                <i class="fas fa-paper-plane"></i> Gửi yêu cầu chỉnh sửa
-              </button>
-            </div>
-
-            <div class="step-actions">
-              <button class="btn-next" id="nextStep4">
-                <i class="fas fa-arrow-right"></i> Tiếp tục - Hoàn thành
-              </button>
-            </div>
-          </div>
-
-          <!-- Step 5: Hoàn thành -->
-          <div class="step-panel" id="step5">
             <h2>
               <i class="fas fa-check-circle"></i> Đưa website lên internet!
             </h2>

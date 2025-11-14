@@ -233,14 +233,6 @@ function loadCostBreakdown() {
                         <p>${section.description}</p>
                     </div>
                 </div>
-                <div class="cost-section-items">
-                    ${section.items.map(item => `
-                        <div class="work-item-simple">
-                            <i class="fas fa-check-circle"></i>
-                            <span>${item.name}</span>
-                        </div>
-                    `).join('')}
-                </div>
             </div>
         `;
     }).join('');
@@ -426,6 +418,115 @@ function confirmTopup() {
 function startConstruction() {
     addChatMessage('Dự án đã bắt đầu thi công! Bạn có thể theo dõi tiến độ ở Timeline.', 'bot');
     goToStep(3);
+    loadStep3Progress();
+}
+
+// Step 3 Functions - Progress & Preview
+function loadStep3Progress() {
+    const workProgressList = document.getElementById('workProgressList');
+    
+    // Get work sections from Step 2
+    const workSections = [
+        {
+            title: 'Lập kế hoạch & Phân tích',
+            icon: 'fas fa-lightbulb',
+            tasks: ['Phân tích yêu cầu dự án', 'Thiết kế kiến trúc hệ thống', 'Lập kế hoạch phát triển']
+        },
+        {
+            title: 'Thiết kế giao diện',
+            icon: 'fas fa-paint-brush',
+            tasks: ['Thiết kế trang chủ', 'Thiết kế các trang nội dung', 'Thiết kế responsive']
+        },
+        {
+            title: 'Phát triển tính năng',
+            icon: 'fas fa-cogs',
+            tasks: ['Giỏ hàng thông minh', 'Hệ thống thanh toán online', 'Quản lý đơn hàng']
+        },
+        {
+            title: 'Tích hợp hệ thống',
+            icon: 'fas fa-plug',
+            tasks: ['Tích hợp VNPay', 'Tích hợp Momo', 'Facebook Pixel & Marketing']
+        },
+        {
+            title: 'Kiểm tra & Triển khai',
+            icon: 'fas fa-check-double',
+            tasks: ['Kiểm tra chức năng toàn diện', 'Kiểm tra bảo mật', 'Tối ưu hiệu suất', 'Triển khai lên server']
+        }
+    ];
+    
+    workProgressList.innerHTML = workSections.map((section, index) => `
+        <div class="work-progress-item" data-section="${index}">
+            <div class="work-progress-header">
+                <div class="work-progress-icon">
+                    <i class="${section.icon}"></i>
+                </div>
+                <div class="work-progress-info">
+                    <h4>${section.title}</h4>
+                    <div class="work-progress-meta">
+                        <span class="progress-status" id="status-${index}">Chưa bắt đầu</span>
+                        <span class="progress-percent" id="percent-${index}">0%</span>
+                    </div>
+                </div>
+            </div>
+            <div class="work-progress-bar">
+                <div class="progress-fill" id="progress-${index}" style="width: 0%"></div>
+            </div>
+        </div>
+    `).join('');
+    
+    // Start progress simulation
+    simulateProgress(workSections);
+}
+
+function simulateProgress(workSections) {
+    let currentSection = 0;
+    
+    const progressInterval = setInterval(() => {
+        if (currentSection >= workSections.length) {
+            clearInterval(progressInterval);
+            onProgressComplete();
+            return;
+        }
+        
+        const section = workSections[currentSection];
+        const totalTasks = section.tasks.length;
+        
+        // Animate progress from 0 to 100 for current section
+        let currentProgress = 0;
+        const progressStep = 100 / totalTasks;
+        
+        const sectionInterval = setInterval(() => {
+            if (currentProgress >= 100) {
+                clearInterval(sectionInterval);
+                document.getElementById(`status-${currentSection}`).textContent = 'Hoàn thành';
+                document.getElementById(`status-${currentSection}`).className = 'progress-status completed';
+                currentSection++;
+                return;
+            }
+            
+            currentProgress += progressStep;
+            if (currentProgress > 100) currentProgress = 100;
+            
+            document.getElementById(`progress-${currentSection}`).style.width = `${currentProgress}%`;
+            document.getElementById(`percent-${currentSection}`).textContent = `${Math.round(currentProgress)}%`;
+            document.getElementById(`status-${currentSection}`).textContent = 'Đang thực hiện';
+            document.getElementById(`status-${currentSection}`).className = 'progress-status active';
+        }, 800 / totalTasks);
+        
+    }, 3000); // 3 seconds per section
+}
+
+function onProgressComplete() {
+    // Show preview section
+    document.getElementById('previewSection').style.display = 'block';
+    
+    // Enable next button
+    document.getElementById('nextStep3').disabled = false;
+    
+    // Scroll to preview
+    document.getElementById('previewSection').scrollIntoView({ behavior: 'smooth', block: 'start' });
+    
+    addChatMessage('Website đã hoàn thành! Hãy xem thử và gửi ý kiến nếu cần chỉnh sửa.', 'bot');
 }
 
 // Initialize Application
@@ -452,7 +553,6 @@ function initializeEventListeners() {
     document.getElementById('summaryBtn')?.addEventListener('click', openSummaryModal);
     document.getElementById('endChatBtn')?.addEventListener('click', openEndChatModal);
     document.getElementById('nextStep3')?.addEventListener('click', () => goToStep(4));
-    document.getElementById('nextStep4')?.addEventListener('click', () => goToStep(5));
     document.getElementById('proceedBtn')?.addEventListener('click', startConstruction);
     document.getElementById('addCreditBtn')?.addEventListener('click', openCreditModal);
     document.getElementById('deployBtn')?.addEventListener('click', deployWebsite);
@@ -1077,203 +1177,8 @@ const featurePages = {
     ]
 };
 
-// Step 3 Functions
-function loadStep3Data() {
-    const featurePipeline = document.getElementById('featurePipeline');
-    featurePipeline.innerHTML = '';
-    
-    appState.features = mockFeatures.map((feature, index) => ({
-        ...feature,
-        status: 'pending',
-        progress: 0,
-        pages: featurePages[feature.name] || []
-    }));
-    
-    appState.features.forEach((feature, index) => {
-        const item = document.createElement('div');
-        item.className = 'feature-item';
-        item.id = `feature-${index}`;
-        
-        const pagesHTML = feature.pages.map((page, pageIndex) => `
-            <div class="page-item">
-                <div class="page-status-icon pending" id="page-status-${index}-${pageIndex}">
-                    <i class="fas fa-circle"></i>
-                </div>
-                <span class="page-name">${page}</span>
-                <span class="page-status-label" id="page-label-${index}-${pageIndex}">Chưa làm</span>
-            </div>
-        `).join('');
-        
-        item.innerHTML = `
-            <div class="feature-header">
-                <span class="feature-name">${feature.name}</span>
-                <span class="feature-status pending" id="status-${index}">Chưa thực hiện</span>
-            </div>
-            <div class="feature-pages">
-                ${pagesHTML}
-            </div>
-        `;
-        featurePipeline.appendChild(item);
-    });
-    
-    // Load progress summary
-    updateProgressSummary();
-    
-    // Start simulating progress
-    simulateProgress();
-}
-
-function updateProgressSummary() {
-    const progressSummary = document.getElementById('progressSummary');
-    const totalPages = appState.features.reduce((sum, f) => sum + f.pages.length, 0);
-    const totalProgress = appState.features.reduce((sum, f) => sum + f.progress, 0);
-    const avgProgress = Math.round(totalProgress / (appState.features.length * 100) * 100);
-    
-    const completedFeatures = appState.features.filter(f => f.status === 'completed').length;
-    const inProgressFeatures = appState.features.filter(f => f.status === 'in-progress').length;
-    const pendingFeatures = appState.features.filter(f => f.status === 'pending').length;
-    
-    progressSummary.innerHTML = `
-        <div class="progress-stat">
-            <div class="progress-stat-label">Tiến độ chung</div>
-            <div class="progress-stat-value">${avgProgress}%</div>
-        </div>
-        
-        <div class="progress-bar-container">
-            <div class="progress-bar-label">
-                <span>Tiến trình:</span>
-                <span>${appState.features.filter(f => f.status === 'completed').length}/${appState.features.length} features</span>
-            </div>
-            <div class="progress-bar">
-                <div class="progress-bar-fill" style="width: ${avgProgress}%"></div>
-            </div>
-        </div>
-        
-        <div class="progress-status-card">
-            <div class="progress-status-item">
-                <div class="progress-status-icon completed">
-                    <i class="fas fa-check-circle"></i>
-                </div>
-                <span class="progress-status-text">Hoàn thành: <strong>${completedFeatures}</strong></span>
-            </div>
-            <div class="progress-status-item">
-                <div class="progress-status-icon in-progress">
-                    <i class="fas fa-spinner fa-spin"></i>
-                </div>
-                <span class="progress-status-text">Đang làm: <strong>${inProgressFeatures}</strong></span>
-            </div>
-            <div class="progress-status-item">
-                <div class="progress-status-icon pending">
-                    <i class="fas fa-circle"></i>
-                </div>
-                <span class="progress-status-text">Chưa làm: <strong>${pendingFeatures}</strong></span>
-            </div>
-        </div>
-    `;
-}
-
-function simulateProgress() {
-    let currentFeature = 0;
-    let currentPageInFeature = 0;
-    
-    const interval = setInterval(() => {
-        if (currentFeature >= appState.features.length) {
-            clearInterval(interval);
-            updateProgressSummary();
-            document.getElementById('nextStep3').disabled = false;
-            addChatMessage('Tất cả tính năng đã hoàn thành! Bạn có thể xem kết quả.', 'bot');
-            return;
-        }
-        
-        const feature = appState.features[currentFeature];
-        const featureElement = document.getElementById(`feature-${currentFeature}`);
-        const statusElement = featureElement.querySelector('.feature-status');
-        
-        // Mark feature as in-progress
-        if (feature.status === 'pending') {
-            feature.status = 'in-progress';
-            featureElement.classList.add('in-progress');
-            statusElement.textContent = 'Đang thực hiện';
-            statusElement.className = 'feature-status in-progress';
-            currentPageInFeature = 0;
-        }
-        
-        // Update page status
-        if (currentPageInFeature < feature.pages.length) {
-            const pageStatusIcon = document.getElementById(`page-status-${currentFeature}-${currentPageInFeature}`);
-            const pageLabel = document.getElementById(`page-label-${currentFeature}-${currentPageInFeature}`);
-            
-            pageStatusIcon.className = 'page-status-icon in-progress';
-            pageStatusIcon.innerHTML = '<i class="fas fa-spinner fa-spin"></i>';
-            pageLabel.textContent = 'Đang làm';
-            
-            // Simulate page completion after 500ms
-            setTimeout(() => {
-                pageStatusIcon.className = 'page-status-icon completed';
-                pageStatusIcon.innerHTML = '<i class="fas fa-check-circle"></i>';
-                pageLabel.textContent = 'Hoàn thành';
-            }, 500);
-            
-            feature.progress += Math.round(100 / feature.pages.length);
-            currentPageInFeature++;
-        } else {
-            // All pages done, mark feature as completed
-            feature.status = 'completed';
-            featureElement.classList.remove('in-progress');
-            featureElement.classList.add('completed');
-            statusElement.textContent = 'Hoàn thành';
-            statusElement.className = 'feature-status completed';
-            feature.progress = 100;
-            currentFeature++;
-            currentPageInFeature = 0;
-        }
-        
-        updateProgressSummary();
-    }, 1000);
-}
-
 // Step 4 Functions (Preview)
-function loadStep4Data() {
-    // Load preview content
-    const previewFrame = document.getElementById('previewFrame');
-    previewFrame.innerHTML = `
-        <div style="padding: 2rem; text-align: center;">
-            <h1 style="color: var(--primary-color); margin-bottom: 1rem;">Fashion Store</h1>
-            <p style="color: var(--text-secondary); margin-bottom: 2rem;">Website E-commerce của bạn</p>
-            <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 1rem;">
-                ${[1, 2, 3, 4, 5, 6].map(i => `
-                    <div style="background: var(--light-bg); padding: 1rem; border-radius: 8px;">
-                        <div style="width: 100%; height: 150px; background: var(--border-color); border-radius: 8px; margin-bottom: 0.5rem;"></div>
-                        <p style="font-weight: 600;">Sản phẩm ${i}</p>
-                        <p style="color: var(--primary-color);">1,000,000 VNĐ</p>
-                    </div>
-                `).join('')}
-            </div>
-        </div>
-    `;
-    
-    // Enable next button
-    const nextBtn = document.getElementById('nextStep4');
-    if (nextBtn) {
-        nextBtn.disabled = false;
-    }
-}
-
-// Step 5 Functions (Deploy)
-function loadStep5Data() {
-    addChatMessage('Bạn đã sẵn sàng đưa website lên internet! Hãy nhấn nút Deploy khi sẵn sàng.', 'bot');
-}
-
-function switchPreviewTab(tab) {
-    document.querySelectorAll('.tab-btn').forEach(btn => {
-        btn.classList.remove('active');
-    });
-    event.target.classList.add('active');
-    
-    // In a real app, this would load different preview content
-    addChatMessage(`Đã chuyển sang giao diện ${tab === 'admin' ? 'Admin' : 'Client'}`, 'bot');
-}
-
+// Step 3 Helper Functions
 function submitComment() {
     const comment = document.getElementById('commentInput').value.trim();
     
@@ -1286,6 +1191,7 @@ function submitComment() {
     }
 }
 
+// Step 4 Functions (Deploy)
 function deployWebsite() {
     const deployBtn = document.getElementById('deployBtn');
     const deployStatus = document.getElementById('deployStatus');
@@ -1349,19 +1255,21 @@ function goToStep(stepNumber) {
             loadStep2Data();
             break;
         case 3:
-            loadStep3Data();
-            break;
-        case 4:
-            loadStep4Data();
-            break;
-        case 5:
-            loadStep5Data();
+            loadStep3Progress();
             break;
     }
     
-    // Scroll to top
-    document.querySelector('.right-column').scrollTop = 0;
+    // Scroll to top - use setTimeout to ensure DOM is updated first
+    setTimeout(() => {
+        const rightColumn = document.querySelector('.right-column');
+        rightColumn.scrollTo({
+            top: 0,
+            behavior: 'smooth'
+        });
+    }, 100);
 }
+
+// Utility function to simulate typing effect
 
 // Utility function to simulate typing effect
 function typeMessage(element, text, speed = 30) {
