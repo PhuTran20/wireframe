@@ -8,6 +8,7 @@ const appState = {
     features: [],
     chatHistory: [],
     editingIndex: null, // Để track câu hỏi đang được chỉnh sửa
+    editingQAIndex: null, // Track câu đang edit từ editor
     summaryViewed: false, // Track if user has viewed the summary modal
     completionMessageShown: false, // Track if completion message was shown
     improvementMessageShown: false // Track if improvement message was shown
@@ -24,14 +25,14 @@ const mockQuestions = [
 
 const mockAnswers = [
     "Website E-commerce bán sản phẩm thời trang dành cho giới trẻ, tập trung vào phân khúc 18-30 tuổi với phong cách hiện đại năng động",
-    "Cần có giỏ hàng, thanh toán online qua VNPay và Momo, quản lý đơn hàng, tìm kiếm và lọc sản phẩm theo nhiều tiêu chí, wishlist, đánh giá sản phẩm",
-    "Thiết kế",
-    "Tích hợp VNPay, Momo, Facebook Pixel để tracking, Google Analytics, hệ thống email marketing Mailchimp",
-    "Khoảng 6-8 tuần, chia làm 3 giai đoạn: UI/UX (2 tuần), Development (4 tuần), Testing (1-2 tuần)"
+    "Giỏ hàng, thanh toán, quản lý đơn hàng",
+    "Thiết kế hiện đại",
+    "Tích hợp VNPay, Momo",
+    "Khoảng 6-8 tuần"
 ];
 
 // Điểm đánh giá tương ứng (1=tốt nhất, 5=tệ nhất)
-const mockScores = [1, 1, 4, 2, 1]; // Câu 3 có điểm 4 (Mơ hồ) để test
+const mockScores = [1, 3, 5, 2, 1]; // Demo đầy đủ: điểm 1, 3, 5, 2, 1
 
 // Mock features với mô tả chi tiết cho người dùng
 const projectFeatures = [
@@ -678,9 +679,9 @@ function stopRecording() {
 }
 
 function processVoiceInput() {
-    // Nếu đang ở chế độ edit
-    if (appState.editingIndex !== null) {
-        const editIndex = appState.editingIndex;
+    // Nếu đang ở chế độ edit (check both editingIndex and editingQAIndex)
+    if (appState.editingIndex !== null || appState.editingQAIndex !== null) {
+        const editIndex = appState.editingIndex !== null ? appState.editingIndex : appState.editingQAIndex;
         const qa = appState.qaData[editIndex];
         
         // Simulate recording to processing
@@ -716,6 +717,10 @@ function processVoiceInput() {
                     
                     // Reset editing mode
                     appState.editingIndex = null;
+                    appState.editingQAIndex = null;
+                    
+                    // Remove active editing highlight
+                    document.querySelectorAll('.qa-sentence').forEach(s => s.classList.remove('active-editing'));
                     
                     checkStep1Completion();
                 }, 1000);
@@ -797,7 +802,7 @@ function generateImprovedAnswer(question, oldAnswer) {
             'Thiết kế hiện đại theo phong cách minimalist, sử dụng màu chủ đạo là trắng, đen và điểm nhấn màu pastel nhẹ nhàng. Giao diện phải responsive hoàn toàn trên mọi thiết bị (mobile, tablet, desktop), có animations mượt mà, ảnh sản phẩm được trình bày theo dạng grid với khả năng zoom và xem 360 độ. Font chữ hiện đại, dễ đọc, layout clean với nhiều white space.',
         
         'Dự án cần tích hợp với hệ thống nào không?':
-            'Tích hợp cổng thanh toán VNPay và Momo cho thanh toán nội địa, Facebook Pixel và Google Analytics để tracking và phân tích hành vi người dùng, hệ thống email marketing Mailchimp cho automation campaign, đồng bộ với hệ thống vận chuyển Giao Hàng Nhanh và Giao Hàng Tiết Kiệm, tích hợp chatbot Facebook Messenger để hỗ trợ khách hàng 24/7.',
+            'Tích hợp cổng thanh toán VNPay và Momo cho thanh toán nội địa, Facebook Pixel và Google Analytics để tracking và phân tích hành vi người dùng, hệ thống email marketing Mailchimp cho automation campaign, đồng bộ với hệ thống vận chuyển như Giao Hàng Nhanh, tích hợp chatbot Facebook Messenger để hỗ trợ khách hàng 24/7.',
         
         'Bạn mong muốn thời gian hoàn thành là bao lâu?':
             'Khoảng 6-8 tuần, được chia thành 3 giai đoạn rõ ràng: Giai đoạn 1 là thiết kế UI/UX và xác nhận mockup (2 tuần), giai đoạn 2 là phát triển frontend và backend với các tính năng core (4 tuần), giai đoạn 3 là testing toàn diện, fix bug và deployment lên production (1-2 tuần). Mỗi giai đoạn sẽ có milestone để review và feedback.'
@@ -810,10 +815,10 @@ function generateImprovedAnswer(question, oldAnswer) {
 function generateBotResponse(questionIndex) {
     const responses = [
         'Tuyệt vời! Website E-commerce bán thời trang cho giới trẻ là một ý tưởng hay. Thông tin rất chi tiết!',
-        'Các tính năng bạn liệt kê rất đầy đủ và phù hợp với E-commerce hiện đại. Tôi đã ghi nhận.',
-        'Hmm, bạn có thể cho tôi biết cụ thể hơn về yêu cầu thiết kế không? Ví dụ: phong cách màu sắc, layout mong muốn?',
-        'Tuyệt! Tích hợp thanh toán và tracking rất quan trọng. Thông tin khá đầy đủ.',
-        'Thời gian 6-8 tuần với 3 giai đoạn rõ ràng là rất hợp lý. Chúng ta có thể bắt đầu ngay!'
+        'Hmm, bạn có thể cho tôi biết cụ thể hơn về các tính năng không? Ví dụ: thanh toán qua kênh nào, có wishlist không?',
+        'Ồ, thông tin về thiết kế hơi ngắn. Bạn có thể mô tả rõ hơn về phong cách, màu sắc, layout mong muốn không?',
+        'Tuyệt! Tích hợp VNPay và Momo rất phù hợp cho thị trường Việt Nam.',
+        'Thời gian 6-8 tuần là hợp lý. Tôi đã ghi nhận!'
     ];
     return responses[questionIndex] || 'Cảm ơn thông tin của bạn!';
 }
@@ -846,7 +851,7 @@ function loadStep1Questions() {
 
 function addQAItem(question, answer, score) {
     const qaList = document.getElementById('qaList');
-    const qaItem = document.createElement('div');
+    const qaTextEditor = document.getElementById('qaTextEditor');
     const itemId = `qa-item-${appState.qaData.length}`;
     
     // Đảo ngược thang điểm: 1 = tốt nhất, 5 = tệ nhất
@@ -854,8 +859,9 @@ function addQAItem(question, answer, score) {
     const statusIcon = score === 1 ? 'fa-check-circle' : score === 2 ? 'fa-check' : score === 3 ? 'fa-exclamation-triangle' : score === 4 ? 'fa-exclamation-circle' : 'fa-times-circle';
     const statusText = score === 1 ? 'Rõ ràng' : score === 2 ? 'Khá rõ' : score === 3 ? 'Mơ hồ vừa' : score === 4 ? 'Mơ hồ' : 'Rất mơ hồ';
     const statusDesc = score <= 2 ? 'Thông tin đầy đủ, có thể tiếp tục' : score === 3 ? 'Cần bổ sung thêm thông tin' : 'Thiếu nhiều thông tin, cần sửa lại';
-    const scoreLabel = score === 1 ? '1 - Rõ ràng' : score === 2 ? '2 - Khá rõ' : score === 3 ? '3 - Mơ hồ vừa' : score === 4 ? '4 - Mơ hồ' : '5 - Rất mơ hồ';
     
+    // Add to hidden list (for backward compatibility)
+    const qaItem = document.createElement('div');
     qaItem.className = `qa-item ${statusClass}`;
     qaItem.id = itemId;
     
@@ -897,6 +903,70 @@ function addQAItem(question, answer, score) {
     `;
     
     qaList.appendChild(qaItem);
+    
+    // Update text editor view
+    updateTextEditor();
+}
+
+function updateTextEditor() {
+    const qaTextEditor = document.getElementById('qaTextEditor');
+    
+    if (appState.qaData.length === 0) {
+        qaTextEditor.innerHTML = `
+            <p class="editor-placeholder">
+                Câu trả lời của bạn sẽ được hiển thị ở đây dưới dạng đoạn văn.
+                Những phần được tô màu là những câu cần bổ sung thêm thông tin.
+                Click vào để chỉnh sửa bằng voice chat.
+            </p>
+        `;
+        return;
+    }
+    
+    // Build paragraph from all answers
+    const sentences = appState.qaData.map((qa, index) => {
+        const scoreClass = qa.score <= 2 ? 'score-good' : qa.score === 3 ? 'score-warning' : 'score-danger';
+        const editable = qa.score >= 3 ? 'editable' : '';
+        const tooltipText = qa.score >= 3 ? getTooltipText(qa.question, qa.score) : '';
+        
+        return `<span class="qa-sentence ${scoreClass} ${editable}" data-qa-index="${index}" ${editable ? `onclick="editQAFromEditor(${index})"` : ''}>
+            ${qa.answer}${tooltipText ? `<span class="sentence-tooltip">${tooltipText}</span>` : ''}
+        </span>`;
+    }).join('. ');
+    
+    qaTextEditor.innerHTML = sentences + '.';
+}
+
+function getTooltipText(question, score) {
+    if (score === 3) {
+        return `💡 Cần bổ sung: ${question}`;
+    } else if (score >= 4) {
+        return `⚠️ Cần trả lời lại: ${question}`;
+    }
+    return '';
+}
+
+function editQAFromEditor(index) {
+    const qa = appState.qaData[index];
+    
+    // Highlight the sentence being edited
+    document.querySelectorAll('.qa-sentence').forEach(s => s.classList.remove('active-editing'));
+    const sentence = document.querySelector(`[data-qa-index="${index}"]`);
+    if (sentence) {
+        sentence.classList.add('active-editing');
+    }
+    
+    // Add message to chat
+    addChatMessage(`Bạn muốn chỉnh sửa câu: "${qa.answer}". Hãy nói lại câu trả lời mới.`, 'bot');
+    addChatMessage(`📌 Câu hỏi: ${qa.question}`, 'bot');
+    
+    // Set editing state
+    appState.editingQAIndex = index;
+    
+    // Scroll to chat
+    const leftColumn = document.getElementById('leftColumn');
+    if (leftColumn.style.display === 'none') {
+        document.getElementById('floatingChatBtn').click();
+    }
 }
 
 function generateStars(score) {
@@ -1012,8 +1082,17 @@ function editQAItem(index) {
     
     // Set editing mode
     appState.editingIndex = index;
+    appState.editingQAIndex = index;
+    
+    // Highlight in editor
+    document.querySelectorAll('.qa-sentence').forEach(s => s.classList.remove('active-editing'));
+    const sentence = document.querySelector(`[data-qa-index="${index}"]`);
+    if (sentence) {
+        sentence.classList.add('active-editing');
+    }
     
     // Mở chat panel nếu đang đóng
+    const leftColumn = document.getElementById('leftColumn');
     if (!leftColumn.classList.contains('expanded')) {
         toggleChatPanel();
     }
@@ -1023,9 +1102,11 @@ function editQAItem(index) {
     addChatMessage(botMessage, 'bot');
     
     // Cuộn xuống cuối chat
+    const chatMessages = document.getElementById('chatMessages');
     chatMessages.scrollTop = chatMessages.scrollHeight;
     
     // Highlight nút micro để người dùng chú ý
+    const micBtn = document.getElementById('micBtn');
     micBtn.classList.add('pulse-animation');
     setTimeout(() => {
         micBtn.classList.remove('pulse-animation');
@@ -1039,6 +1120,9 @@ function refreshQAList() {
     appState.qaData.forEach((qa, index) => {
         addQAItemFromData(qa, index);
     });
+    
+    // Update editor
+    updateTextEditor();
     
     // Reset message flags when list is refreshed (after editing)
     appState.completionMessageShown = false;
