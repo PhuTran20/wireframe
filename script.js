@@ -746,8 +746,12 @@ function processVoiceInput() {
             if (appState.currentStep === 1) {
                 // Sử dụng điểm đã định nghĩa sẵn trong mockScores
                 const score = mockScores[currentStepQA];
-                addQAItem(mockQuestions[currentStepQA], userMessage, score);
+                
+                // Push to data FIRST
                 appState.qaData.push({ question: mockQuestions[currentStepQA], answer: userMessage, score });
+                
+                // Then update UI
+                addQAItem(mockQuestions[currentStepQA], userMessage, score);
                 
                 checkStep1Completion();
             }
@@ -852,7 +856,10 @@ function loadStep1Questions() {
 function addQAItem(question, answer, score) {
     const qaList = document.getElementById('qaList');
     const qaTextEditor = document.getElementById('qaTextEditor');
-    const itemId = `qa-item-${appState.qaData.length}`;
+    
+    // Index should be current length - 1 (the item we just pushed)
+    const currentIndex = appState.qaData.length - 1;
+    const itemId = `qa-item-${currentIndex}`;
     
     // Đảo ngược thang điểm: 1 = tốt nhất, 5 = tệ nhất
     const statusClass = score <= 2 ? 'status-good' : score === 3 ? 'status-warning' : 'status-danger';
@@ -887,7 +894,7 @@ function addQAItem(question, answer, score) {
             </div>
             <div class="qa-col-actions">
                 ${score > 2 ? `
-                    <button class="btn-edit" onclick="editQAItem(${appState.qaData.length})" title="Nhấn để sửa câu trả lời">
+                    <button class="btn-edit" onclick="editQAItem(${currentIndex})" title="Nhấn để sửa câu trả lời">
                         <i class="fas fa-cog"></i>
                     </button>
                 ` : '<span class="check-mark"><i class="fas fa-check"></i></span>'}
@@ -922,25 +929,34 @@ function updateTextEditor() {
         return;
     }
     
-    // Build paragraph from all answers
+    // Build paragraph from all answers - các câu văn sẽ hiển thị liền nhau
     const sentences = appState.qaData.map((qa, index) => {
         const scoreClass = qa.score <= 2 ? 'score-good' : qa.score === 3 ? 'score-warning' : 'score-danger';
         const editable = qa.score >= 3 ? 'editable' : '';
+        const tooltipClass = qa.score === 3 ? 'tooltip-warning' : qa.score >= 4 ? 'tooltip-danger' : '';
         const tooltipText = qa.score >= 3 ? getTooltipText(qa.question, qa.score) : '';
         
+        // Icon for score 3, 4, 5
+        let scoreIcon = '';
+        if (qa.score === 3) {
+            scoreIcon = '<i class="fas fa-exclamation-triangle qa-sentence-icon"></i>';
+        } else if (qa.score >= 4) {
+            scoreIcon = '<i class="fas fa-times-circle qa-sentence-icon"></i>';
+        }
+        
         return `<span class="qa-sentence ${scoreClass} ${editable}" data-qa-index="${index}" ${editable ? `onclick="editQAFromEditor(${index})"` : ''}>
-            ${qa.answer}${tooltipText ? `<span class="sentence-tooltip">${tooltipText}</span>` : ''}
+            ${qa.answer}${scoreIcon}${tooltipText ? `<span class="sentence-tooltip ${tooltipClass}">${tooltipText}</span>` : ''}
         </span>`;
-    }).join('. ');
+    }).join(' ');
     
-    qaTextEditor.innerHTML = sentences + '.';
+    qaTextEditor.innerHTML = sentences;
 }
 
 function getTooltipText(question, score) {
     if (score === 3) {
-        return `💡 Cần bổ sung: ${question}`;
+        return `<i class="fas fa-exclamation-triangle"></i> Cần bổ sung: ${question}`;
     } else if (score >= 4) {
-        return `⚠️ Cần trả lời lại: ${question}`;
+        return `<i class="fas fa-times-circle"></i> Cần trả lời lại: ${question}`;
     }
     return '';
 }
