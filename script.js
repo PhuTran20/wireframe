@@ -535,6 +535,18 @@ document.addEventListener('DOMContentLoaded', () => {
     initializeEventListeners();
     initializeNavigation();
     loadStep1Questions();
+    
+    // Close popovers when clicking outside
+    document.addEventListener('click', (e) => {
+        if (!e.target.closest('.qa-sentence')) {
+            document.querySelectorAll('.sentence-popover').forEach(popover => {
+                popover.classList.remove('active');
+            });
+            document.querySelectorAll('.qa-sentence').forEach(sentence => {
+                sentence.classList.remove('active');
+            });
+        }
+    });
 });
 
 // Event Listeners
@@ -923,7 +935,7 @@ function updateTextEditor() {
             <p class="editor-placeholder">
                 Câu trả lời của bạn sẽ được hiển thị ở đây dưới dạng đoạn văn.
                 Những phần được tô màu là những câu cần bổ sung thêm thông tin.
-                Click vào để chỉnh sửa bằng voice chat.
+                Click vào để xem chi tiết và chỉnh sửa.
             </p>
         `;
         return;
@@ -932,9 +944,7 @@ function updateTextEditor() {
     // Build paragraph from all answers - các câu văn sẽ hiển thị liền nhau
     const sentences = appState.qaData.map((qa, index) => {
         const scoreClass = qa.score <= 2 ? 'score-good' : qa.score === 3 ? 'score-warning' : 'score-danger';
-        const editable = qa.score >= 3 ? 'editable' : '';
-        const tooltipClass = qa.score === 3 ? 'tooltip-warning' : qa.score >= 4 ? 'tooltip-danger' : '';
-        const tooltipText = qa.score >= 3 ? getTooltipText(qa.question, qa.score) : '';
+        const popoverClass = qa.score <= 2 ? 'popover-good' : qa.score === 3 ? 'popover-warning' : 'popover-danger';
         
         // Icon for score 3, 4, 5
         let scoreIcon = '';
@@ -944,12 +954,118 @@ function updateTextEditor() {
             scoreIcon = '<i class="fas fa-times-circle qa-sentence-icon"></i>';
         }
         
-        return `<span class="qa-sentence ${scoreClass} ${editable}" data-qa-index="${index}" ${editable ? `onclick="editQAFromEditor(${index})"` : ''}>
-            ${qa.answer}${scoreIcon}${tooltipText ? `<span class="sentence-tooltip ${tooltipClass}">${tooltipText}</span>` : ''}
+        // Popover for all sentences
+        let popoverHtml = '';
+        const headerIcon = qa.score <= 2 ? 'fa-check-circle' : qa.score === 3 ? 'fa-exclamation-triangle' : 'fa-times-circle';
+        const scoreLabel = qa.score <= 2 ? 'Rõ ràng' : qa.score === 3 ? 'Mơ hồ - Cần bổ sung' : 'Cần chỉnh sửa';
+        const hint = getHintForQuestion(qa.question, qa.score);
+        
+        popoverHtml = `
+            <div class="sentence-popover ${popoverClass}" data-popover-index="${index}">
+                <div class="popover-header">
+                    <i class="fas ${headerIcon}"></i>
+                    <div class="popover-question">${scoreLabel}</div>
+                </div>
+                <div class="popover-content">
+                    <div class="popover-original-question">
+                        <strong>Thông tin cần cung cấp:</strong>
+                        <p>${qa.question}</p>
+                    </div>
+                    <div class="popover-hint">
+                        <strong>Phản hồi:</strong>
+                        <p>${hint}</p>
+                    </div>
+                </div>
+                <div class="popover-actions">
+                    <button class="popover-btn btn-voice" onclick="event.stopPropagation(); editQAFromPopover(${index});">
+                        <i class="fas fa-microphone"></i>
+                        <span>Sửa bằng voice</span>
+                    </button>
+                    <button class="popover-btn btn-delete" onclick="event.stopPropagation(); deleteQAItem(${index});">
+                        <i class="fas fa-trash"></i>
+                        <span>Xóa</span>
+                    </button>
+                </div>
+            </div>
+        `;
+        
+        return `<span class="qa-sentence ${scoreClass} editable" data-qa-index="${index}" onclick="event.stopPropagation(); toggleQAPopover(${index});">
+            ${qa.answer}${scoreIcon}${popoverHtml}
         </span>`;
     }).join(' ');
     
     qaTextEditor.innerHTML = sentences;
+}
+
+// Popover functions
+function toggleQAPopover(index) {
+    // Close all other popovers and remove active class from sentences
+    document.querySelectorAll('.sentence-popover').forEach(popover => {
+        if (popover.getAttribute('data-popover-index') !== String(index)) {
+            popover.classList.remove('active');
+        }
+    });
+    document.querySelectorAll('.qa-sentence').forEach(sentence => {
+        if (sentence.getAttribute('data-qa-index') !== String(index)) {
+            sentence.classList.remove('active');
+        }
+    });
+    
+    // Toggle current popover and sentence active state
+    const popover = document.querySelector(`[data-popover-index="${index}"]`);
+    const sentence = document.querySelector(`.qa-sentence[data-qa-index="${index}"]`);
+    
+    if (popover) {
+        const isActive = popover.classList.toggle('active');
+        if (sentence) {
+            if (isActive) {
+                sentence.classList.add('active');
+            } else {
+                sentence.classList.remove('active');
+            }
+        }
+    }
+}
+
+function editQAFromPopover(index) {
+    // Close popover
+    const popover = document.querySelector(`[data-popover-index="${index}"]`);
+    if (popover) {
+        popover.classList.remove('active');
+    }
+    
+    // Call existing edit function
+    editQAFromEditor(index);
+    
+    // Auto start recording
+    setTimeout(() => {
+        if (!appState.isRecording) {
+            toggleRecording();
+        }
+    }, 500);
+}
+
+function deleteQAItem(index) {
+    // Close popover
+    const popover = document.querySelector(`[data-popover-index="${index}"]`);
+    if (popover) {
+        popover.classList.remove('active');
+    }
+    
+    // Confirm deletion
+    if (confirm('Bạn có chắc muốn xóa câu trả lời này?')) {
+        // Remove from data
+        const deletedQA = appState.qaData[index];
+        appState.qaData.splice(index, 1);
+        
+        // Add chat message
+        addChatMessage(`Đã xóa câu trả lời: "${deletedQA.answer}"`, 'bot');
+        addChatMessage('Bạn có thể trả lời lại câu hỏi này bằng cách nhấn nút micro.', 'bot');
+        
+        // Refresh UI
+        refreshQAList();
+        checkStep1Completion();
+    }
 }
 
 function getTooltipText(question, score) {
@@ -959,6 +1075,49 @@ function getTooltipText(question, score) {
         return `<i class="fas fa-times-circle"></i> Cần trả lời lại: ${question}`;
     }
     return '';
+}
+
+function getHintForQuestion(question, score) {
+    const hints = {
+        "Bạn muốn xây dựng loại website gì? (E-commerce, Blog, Corporate, etc.)": {
+            good: "Câu trả lời rất chi tiết! Bạn đã mô tả rõ loại website, đối tượng khách hàng và phong cách thiết kế.",
+            medium: "Hãy bổ sung thêm: Bạn muốn xây dựng cho ai? Mục đích chính là gì? Phong cách nào phù hợp với thương hiệu?",
+            poor: "Vui lòng cung cấp chi tiết về: loại website (E-commerce/Blog/Corporate), đối tượng khách hàng, mục đích, và phong cách thiết kế mong muốn."
+        },
+        "Dự án cần những tính năng chính nào?": {
+            good: "Tuyệt vời! Bạn đã liệt kê rõ các tính năng chính cần có.",
+            medium: "Hãy bổ sung thêm: Những tính năng ưu tiên nhất? Có tính năng đặc biệt nào không? Cần quản lý gì?",
+            poor: "Vui lòng nêu cụ thể các tính năng như: giỏ hàng, thanh toán, tìm kiếm, đánh giá sản phẩm, v.v."
+        },
+        "Bạn có yêu cầu gì về thiết kế và giao diện?": {
+            good: "Rất tốt! Bạn đã mô tả rõ về phong cách, màu sắc và trải nghiệm người dùng.",
+            medium: "Hãy bổ sung: Phong cách nào (hiện đại, cổ điển, tối giản)? Màu sắc chủ đạo? Cảm giác nào cho người dùng?",
+            poor: "Vui lòng cho biết: Phong cách thiết kế, màu sắc chủ đạo, layout, và cảm giác mong muốn trên các thiết bị khác nhau."
+        },
+        "Dự án cần tích hợp với hệ thống nào không?": {
+            good: "Tuyệt vời! Bạn đã nêu rõ các hệ thống cần tích hợp.",
+            medium: "Hãy bổ sung: Có nền tảng thanh toán nào khác không? Cần kết nối CRM hay email marketing không?",
+            poor: "Vui lòng nêu các hệ thống cần tích hợp như: thanh toán (VNPay, Momo), analytics, email marketing, CRM, v.v."
+        },
+        "Bạn mong muốn thời gian hoàn thành là bao lâu?": {
+            good: "Rất tốt! Bạn đã đưa ra thời gian hợp lý với timeline cụ thể.",
+            medium: "Hãy bổ sung: Giai đoạn nào quan trọng nhất? Có deadline cụ thể không? Có thể linh hoạt về thời gian?",
+            poor: "Vui lòng cho biết: Thời gian mong muốn (vài tuần/tháng), giai đoạn quan trọng, và deadline cụ thể nếu có."
+        }
+    };
+    
+    const questionHints = hints[question];
+    if (!questionHints) {
+        return "Vui lòng cung cấp thêm chi tiết về câu hỏi này.";
+    }
+    
+    if (score <= 2) {
+        return questionHints.good;
+    } else if (score === 3) {
+        return questionHints.medium;
+    } else {
+        return questionHints.poor;
+    }
 }
 
 function editQAFromEditor(index) {

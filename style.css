@@ -984,33 +984,61 @@ body {
     align-items: center;
     justify-content: center;
     color: inherit;
+    opacity: 1;
+    transition: opacity 0.2s ease;
+}
+
+.qa-sentence.active .qa-sentence-icon {
+    opacity: 0;
+    visibility: hidden;
 }
 
 .qa-sentence.score-good {
     background: #e6f6ea;
     color: #0f5132;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.qa-sentence.score-good:hover {
+    box-shadow: 0 2px 2px rgba(65, 66, 65, 0.2);
+}
+
+.qa-sentence.score-good.active {
+    background: #c7ecc2;
+    box-shadow: 0 2px 8px rgba(36, 161, 72, 0.3);
 }
 
 .qa-sentence.score-warning {
     background: #fff3cd;
     color: #856404;
     cursor: pointer;
+    transition: all 0.2s ease;
 }
 
 .qa-sentence.score-warning:hover {
-    background: #ffe69c;
     box-shadow: 0 2px 8px rgba(133, 100, 4, 0.2);
+}
+
+.qa-sentence.score-warning.active {
+    background: #ffe69c;
+    box-shadow: 0 2px 8px rgba(148, 102, 0, 0.3);
 }
 
 .qa-sentence.score-danger {
     background: #ffebee;
     color: #c62828;
     cursor: pointer;
+    transition: all 0.2s ease;
 }
 
 .qa-sentence.score-danger:hover {
-    background: #ffcdd2;
     box-shadow: 0 2px 8px rgba(198, 40, 40, 0.2);
+}
+
+.qa-sentence.score-danger.active {
+    background: #ffcdd2;
+    box-shadow: 0 2px 8px rgba(218, 30, 40, 0.3);
 }
 
 .qa-sentence.editable {
@@ -1019,68 +1047,200 @@ body {
 
  
 
-/* Tooltip for sentences */
-.sentence-tooltip {
+/* Popover for sentences */
+.sentence-popover {
     position: absolute;
-    bottom: calc(100% + 8px);
+    bottom: calc(100% + 12px);
     left: 50%;
     transform: translateX(-50%);
-    background: #161616;
-    color: white;
-    padding: 10px 14px;
+    background: white;
+    color: var(--text-primary);
+    padding: 0;
     font-size: 13px;
     line-height: 1.5;
     white-space: normal;
-    max-width: min(400px, 80vw);
-    min-width: 200px;
+    min-width: 320px;
+    max-width: 600px;
     width: max-content;
     opacity: 0;
     visibility: hidden;
     pointer-events: none;
     transition: opacity 0.2s ease, visibility 0.2s ease;
-    z-index: 9999;
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
-    word-wrap: break-word;
-    text-align: left;
+    z-index: 10000;
+    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.15);
+    border: 1px solid var(--border-color);
+    overflow: hidden;
 }
 
-.sentence-tooltip.tooltip-warning {
-    background: #856404;
+.sentence-popover.active {
+    opacity: 1;
+    visibility: visible;
+    pointer-events: auto;
+}
+
+.sentence-popover.popover-good {
+    border-top: 3px solid var(--success-color);
+}
+
+.sentence-popover.popover-warning {
+    border-top: 3px solid #f1c21b;
+}
+
+.sentence-popover.popover-danger {
+    border-top: 3px solid var(--danger-color);
+}
+
+.popover-header {
+    background: var(--ui-02);
+    padding: 12px 16px;
+    border-bottom: 1px solid var(--border-color);
+    display: flex;
+    align-items: flex-start;
+    gap: 8px;
+}
+
+.popover-header i {
+    font-size: 16px;
+    margin-top: 2px;
+    flex-shrink: 0;
+}
+
+.popover-good .popover-header {
+    background: #e6f6ea;
+    color: var(--success-color);
+}
+
+.popover-warning .popover-header {
+    background: #fff3cd;
+    color: #856404;
+}
+
+.popover-danger .popover-header {
+    background: #ffebee;
+    color: var(--danger-color);
+}
+
+.popover-question {
+    flex: 1;
+    font-weight: 600;
+    font-size: 13px;
+    line-height: 1.4;
+}
+
+.popover-content {
+    padding: 12px 16px;
+    border-bottom: 1px solid var(--border-color);
+    background: white;
+}
+
+.popover-original-question {
+    font-size: 12px;
+    line-height: 1.6;
+    background: rgba(241, 194, 27, 0.08);
+    padding: 12px;
+    border-left: 4px solid #f1c21b;
+}
+
+.popover-original-question strong {
+    display: block;
+    font-weight: 700;
+    color: #161616;
+    margin-bottom: 8px;
+    font-size: 13px;
+}
+
+.popover-original-question p {
+    margin: 0;
+    color: #161616;
+    font-weight: 500;
+    font-size: 12px;
+    line-height: 1.6;
+}
+
+.popover-hint {
+    font-size: 12px;
+    line-height: 1.6;
+    margin-top: 12px;
+    padding: 12px;
+    background: rgba(15, 98, 254, 0.08);
+    border-left: 4px solid #0f62fe;
+}
+
+.popover-hint strong {
+    display: block;
+    font-weight: 700;
+    color: #161616;
+    margin-bottom: 8px;
+    font-size: 13px;
+}
+
+.popover-hint p {
+    margin: 0;
+    color: #161616;
+    font-weight: 500;
+    font-size: 12px;
+    line-height: 1.6;
+}
+
+.popover-actions {
+    padding: 12px;
+    display: flex;
+    gap: 8px;
+    background: white;
+}
+
+.popover-btn {
+    flex: 1;
+    padding: 8px 12px;
+    border: 1px solid var(--border-color);
+    background: white;
+    color: var(--text-primary);
+    font-size: 13px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+    transition: all 0.2s ease;
+    font-weight: 500;
+}
+
+.popover-btn:hover {
+    background: var(--ui-02);
+    border-color: var(--primary-color);
+    color: var(--primary-color);
+}
+
+.popover-btn.btn-delete {
+    border-color: var(--danger-color);
+    color: var(--danger-color);
+}
+
+.popover-btn.btn-delete:hover {
+    background: var(--danger-color);
     color: white;
 }
 
-.sentence-tooltip.tooltip-warning::after {
-    border-top-color: #856404;
-}
-
-.sentence-tooltip.tooltip-danger {
-    background: #c62828;
-    color: white;
-}
-
-.sentence-tooltip.tooltip-danger::after {
-    border-top-color: #c62828;
-}
-
-.sentence-tooltip i {
-    margin-right: 6px;
+.popover-btn i {
     font-size: 14px;
-    vertical-align: middle;
 }
 
-.sentence-tooltip::after {
+.sentence-popover::after {
     content: '';
     position: absolute;
     top: 100%;
     left: 50%;
     transform: translateX(-50%);
-    border: 6px solid transparent;
-    border-top-color: #161616;
+    border: 8px solid transparent;
+    border-top-color: white;
 }
 
-.qa-sentence:hover .sentence-tooltip {
-    opacity: 1;
-    visibility: visible;
+.popover-warning::after {
+    border-top-color: white;
+}
+
+.popover-danger::after {
+    border-top-color: white;
 }
 
 /* Q&A List (Step 1) */
@@ -3020,15 +3180,14 @@ body {
 .step-actions {
     display: flex;
     gap: 1rem;
-    justify-content: space-between;
+    justify-content: flex-start;
     align-items: center;
     margin-top: 2rem;
 }
 
 .step-actions-right {
-    display: flex;
+    display: flex-start;
     gap: 1rem;
-    margin-left: auto;
 }
 
 .btn-next,
@@ -3096,7 +3255,6 @@ body {
     background-color: transparent;
     border: 1px solid var(--danger-color);
     color: var(--danger-color);
-    margin-right: auto;
 }
 
 .btn-end-chat:hover {
@@ -3249,7 +3407,7 @@ body {
 .modal-actions {
     display: flex;
     gap: 1rem;
-    justify-content: flex-end;
+    justify-content: flex-start;
     margin-top: 2rem;
     padding-top: 1.5rem;
     border-top: 1px solid var(--border-color);
