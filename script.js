@@ -11,7 +11,8 @@ const appState = {
     editingQAIndex: null, // Track câu đang edit từ editor
     summaryViewed: false, // Track if user has viewed the summary modal
     completionMessageShown: false, // Track if completion message was shown
-    improvementMessageShown: false // Track if improvement message was shown
+    improvementMessageShown: false, // Track if improvement message was shown
+    sessionSaved: false // Track if session has been saved
 };
 
 // Mock LLM Responses
@@ -530,8 +531,72 @@ function onProgressComplete() {
     addChatMessage('Website đã hoàn thành! Hãy xem thử và gửi ý kiến nếu cần chỉnh sửa.', 'bot');
 }
 
+// Session Management Functions
+function saveSession() {
+    // Lưu appState vào localStorage
+    const sessionData = {
+        qaData: appState.qaData,
+        chatHistory: appState.chatHistory,
+        credit: appState.credit,
+        totalCost: appState.totalCost,
+        currentStep: appState.currentStep,
+        summaryViewed: appState.summaryViewed,
+        completionMessageShown: appState.completionMessageShown,
+        improvementMessageShown: appState.improvementMessageShown,
+        timestamp: new Date().toISOString()
+    };
+    
+    localStorage.setItem('wireframeSession', JSON.stringify(sessionData));
+    appState.sessionSaved = true;
+}
+
+function loadSavedSession() {
+    // Kiểm tra xem có phiên làm việc đã lưu không
+    const savedSession = localStorage.getItem('wireframeSession');
+    
+    if (savedSession) {
+        try {
+            const sessionData = JSON.parse(savedSession);
+            
+            // Khôi phục dữ liệu
+            appState.qaData = sessionData.qaData || [];
+            appState.chatHistory = sessionData.chatHistory || [];
+            appState.credit = sessionData.credit || 50000000;
+            appState.totalCost = sessionData.totalCost || 0;
+            appState.currentStep = sessionData.currentStep || 1;
+            appState.summaryViewed = sessionData.summaryViewed || false;
+            appState.completionMessageShown = sessionData.completionMessageShown || false;
+            appState.improvementMessageShown = sessionData.improvementMessageShown || false;
+            appState.sessionSaved = true;
+            
+            // Nếu có QA data, cập nhật UI
+            if (appState.qaData.length > 0) {
+                // Refresh QA list
+                setTimeout(() => {
+                    refreshQAList();
+                    checkStep1Completion();
+                    
+                    // Hiển thị thông báo
+                    addChatMessage('✓ Đã tải lại phiên làm việc trước đó của bạn. Bạn có thể tiếp tục bằng cách nhấn nút micro.', 'bot');
+                }, 500);
+            }
+        } catch (e) {
+            console.error('Lỗi tải phiên làm việc:', e);
+        }
+    }
+}
+
+function clearSession() {
+    // Xóa phiên làm việc đã lưu
+    localStorage.removeItem('wireframeSession');
+    appState.sessionSaved = false;
+}
+
 // Initialize Application
 document.addEventListener('DOMContentLoaded', () => {
+    // Kiểm tra và tải lại phiên làm việc đã lưu
+    loadSavedSession();
+    
     initializeEventListeners();
     initializeNavigation();
     loadStep1Questions();
@@ -565,6 +630,7 @@ function initializeEventListeners() {
     document.getElementById('nextStep1')?.addEventListener('click', () => goToStep(2));
     document.getElementById('summaryBtn')?.addEventListener('click', openSummaryModal);
     document.getElementById('endChatBtn')?.addEventListener('click', openEndChatModal);
+    document.getElementById('pauseBtn')?.addEventListener('click', pauseSession);
     document.getElementById('nextStep3')?.addEventListener('click', () => goToStep(4));
     document.getElementById('proceedBtn')?.addEventListener('click', startConstruction);
     document.getElementById('addCreditBtn')?.addEventListener('click', openCreditModal);
@@ -1156,9 +1222,17 @@ function checkStep1Completion() {
     const summaryBtn = document.getElementById('summaryBtn');
     const nextBtn = document.getElementById('nextStep1');
     const endChatBtn = document.getElementById('endChatBtn');
+    const pauseBtn = document.getElementById('pauseBtn');
     const allQuestionsAnswered = appState.qaData.length >= mockQuestions.length;
     // Đảo ngược: điểm <= 2 là tốt (1 = Rõ ràng, 2 = Khá rõ)
     const allScoresGood = appState.qaData.every(qa => qa.score <= 2);
+    
+    // Always show "Pause" button if at least one question is answered
+    if (appState.qaData.length > 0 && appState.qaData.length < mockQuestions.length) {
+        pauseBtn.style.display = 'inline-flex';
+    } else {
+        pauseBtn.style.display = 'none';
+    }
     
     // Always show "End Chat" button if at least one question is answered
     if (appState.qaData.length > 0) {
@@ -1166,6 +1240,9 @@ function checkStep1Completion() {
     }
     
     if (allQuestionsAnswered) {
+        // Hide pause button when all questions answered
+        pauseBtn.style.display = 'none';
+        
         // Show summary button
         summaryBtn.style.display = 'inline-flex';
         
@@ -1614,6 +1691,26 @@ function closeEndChatModal() {
             }
         }, 300);
     }
+}
+
+function saveAndEndChat() {
+    // Lưu phiên làm việc
+    saveSession();
+    
+    // Đóng modal
+    const modal = document.getElementById('endChatModal');
+    modal.style.display = 'none';
+    
+    // Hiển thị thông báo
+    addChatMessage('💾 Phiên làm việc đã được lưu! Khi bạn vào lại, bấm vào nút micro để tiếp tục trò chuyện.', 'bot');
+}
+
+function pauseSession() {
+    // Lưu phiên làm việc
+    saveSession();
+    
+    // Hiển thị thông báo
+    addChatMessage('⏸️ Phiên làm việc đã được tạm dừng và lưu lại. Khi bạn vào lại, bấm vào nút micro để tiếp tục trò chuyện từ chỗ bạn dừng.', 'bot');
 }
 
 function showSufficientSummary() {
