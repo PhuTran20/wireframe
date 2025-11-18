@@ -12,7 +12,8 @@ const appState = {
     summaryViewed: false, // Track if user has viewed the summary modal
     completionMessageShown: false, // Track if completion message was shown
     improvementMessageShown: false, // Track if improvement message was shown
-    sessionSaved: false // Track if session has been saved
+    sessionSaved: false, // Track if session has been saved
+    isPaused: false // Track if session is paused
 };
 
 // Mock LLM Responses
@@ -1219,60 +1220,43 @@ function generateStars(score) {
 }
 
 function checkStep1Completion() {
-    const summaryBtn = document.getElementById('summaryBtn');
     const nextBtn = document.getElementById('nextStep1');
     const endChatBtn = document.getElementById('endChatBtn');
-    const pauseBtn = document.getElementById('pauseBtn');
     const allQuestionsAnswered = appState.qaData.length >= mockQuestions.length;
     // Đảo ngược: điểm <= 2 là tốt (1 = Rõ ràng, 2 = Khá rõ)
     const allScoresGood = appState.qaData.every(qa => qa.score <= 2);
     
-    // Always show "Pause" button if at least one question is answered
-    if (appState.qaData.length > 0 && appState.qaData.length < mockQuestions.length) {
-        pauseBtn.style.display = 'inline-flex';
-    } else {
-        pauseBtn.style.display = 'none';
-    }
-    
     // Always show "End Chat" button if at least one question is answered
     if (appState.qaData.length > 0) {
         endChatBtn.style.display = 'inline-flex';
-    }
-    
-    if (allQuestionsAnswered) {
-        // Hide pause button when all questions answered
-        pauseBtn.style.display = 'none';
-        
-        // Show summary button
-        summaryBtn.style.display = 'inline-flex';
-        
-        if (allScoresGood) {
-            // Don't show next button automatically anymore
-            // It will only show after user closes the end chat modal
-            // Check if user has already viewed the summary
-            if (appState.summaryViewed) {
-                nextBtn.style.display = 'inline-flex';
-                nextBtn.disabled = false;
-            } else {
-                nextBtn.style.display = 'none';
-                // Only show message once when all questions are answered
-                if (!appState.completionMessageShown) {
-                    addChatMessage('✅ Tất cả câu trả lời đều rõ ràng! Hãy nhấn "Kết thúc trò chuyện" để xem tóm tắt dự án.', 'bot');
-                    appState.completionMessageShown = true;
-                }
-            }
+        // Update button text based on pause state
+        if (appState.isPaused) {
+            endChatBtn.innerHTML = '<i class="fas fa-play-circle"></i> Tiếp tục trò chuyện';
         } else {
-            // Hide next button when not all scores are good
-            nextBtn.style.display = 'none';
-            if (!appState.improvementMessageShown) {
-                addChatMessage('⚠️ Một số câu trả lời chưa đủ rõ ràng. Vui lòng click vào nút bánh răng ⚙️ để chỉnh sửa các câu có điểm > 2.', 'bot');
-                appState.improvementMessageShown = true;
-            }
+            endChatBtn.innerHTML = '<i class="fas fa-times-circle"></i> Kết thúc trò chuyện';
         }
     } else {
-        // Hide both buttons when not all questions answered
-        summaryBtn.style.display = 'none';
+        endChatBtn.style.display = 'none';
+    }
+    
+    // Show "Next" button only when all questions answered AND all scores are good
+    if (allQuestionsAnswered && allScoresGood) {
+        nextBtn.style.display = 'inline-flex';
+        nextBtn.disabled = false;
+        
+        // Show message once when all conditions are met
+        if (!appState.completionMessageShown) {
+            addChatMessage('✅ Tất cả câu trả lời đều rõ ràng! Bạn có thể chuyển sang bước tiếp theo.', 'bot');
+            appState.completionMessageShown = true;
+        }
+    } else {
         nextBtn.style.display = 'none';
+        
+        // Show improvement message if all questions answered but scores not good
+        if (allQuestionsAnswered && !allScoresGood && !appState.improvementMessageShown) {
+            addChatMessage('⚠️ Một số câu trả lời chưa đủ rõ ràng. Vui lòng click vào các câu được tô màu để chỉnh sửa.', 'bot');
+            appState.improvementMessageShown = true;
+        }
     }
 }
 
@@ -1661,6 +1645,13 @@ function closeEndChatModal() {
     const modal = document.getElementById('endChatModal');
     modal.style.display = 'none';
     
+    // Reset isPaused state when closing modal normally (not pausing)
+    appState.isPaused = false;
+    
+    // Update button text back to normal
+    const endChatBtn = document.getElementById('endChatBtn');
+    endChatBtn.innerHTML = '<i class="fas fa-times-circle"></i> Kết thúc trò chuyện';
+    
     // Check if all data is sufficient and mark summary as viewed
     const allQuestionsAnswered = appState.qaData.length >= mockQuestions.length;
     const allScoresGood = appState.qaData.every(qa => qa.score <= 2);
@@ -1711,6 +1702,25 @@ function pauseSession() {
     
     // Hiển thị thông báo
     addChatMessage('⏸️ Phiên làm việc đã được tạm dừng và lưu lại. Khi bạn vào lại, bấm vào nút micro để tiếp tục trò chuyện từ chỗ bạn dừng.', 'bot');
+}
+
+function pauseAndCloseModal() {
+    // Đóng modal
+    const modal = document.getElementById('endChatModal');
+    modal.style.display = 'none';
+    
+    // Đánh dấu là đang tạm dừng
+    appState.isPaused = true;
+    
+    // Đổi text button
+    const endChatBtn = document.getElementById('endChatBtn');
+    endChatBtn.innerHTML = '<i class="fas fa-play-circle"></i> Tiếp tục trò chuyện';
+    
+    // Lưu phiên làm việc
+    saveSession();
+    
+    // Hiển thị thông báo
+    addChatMessage('⏸️ Phiên làm việc đã được tạm dừng và lưu lại. Bạn có thể quay lại bất cứ lúc nào để tiếp tục!', 'bot');
 }
 
 function showSufficientSummary() {

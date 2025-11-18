@@ -1056,7 +1056,6 @@ body {
     align-items: center;
     gap: 0.4rem;
     padding: 0.45rem 0.65rem;
-    border-radius: 5px;
     cursor: help;
     transition: all 0.25s ease;
     font-size: 12px;
@@ -1121,7 +1120,6 @@ body {
     background-color: #262626;
     color: #ffffff;
     padding: 0.55rem 0.85rem;
-    border-radius: 5px;
     font-size: 11px;
     font-weight: 400;
     white-space: normal;
@@ -1137,7 +1135,6 @@ body {
 }
 
 .color-indicator-group:hover {
-    transform: translateY(-2px);
     box-shadow: 0 3px 8px rgba(0, 0, 0, 0.12);
 }
 
