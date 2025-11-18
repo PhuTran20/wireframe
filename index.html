@@ -18,12 +18,19 @@
           <img src="./logo-midilang-min.png" alt="MIDILANG Logo" />
           <span style="color: black">MIDILANG</span>
         </div>
+        <div class="header-center">
+          <div class="session-selector">
+            <label for="sessionSelect">
+              <i class="fas fa-folder-open"></i>
+              <span>Phiên làm việc:</span>
+            </label>
+            <select id="sessionSelect" class="session-select">
+              <option value="current">Phiên hiện tại</option>
+            </select>
+            <span class="session-name" id="sessionName">Chưa đặt tên</span>
+          </div>
+        </div>
         <nav class="header-nav">
-          <a href="#home" class="nav-item active" style="color: black">
-            <i class="fas fa-home"></i>
-            <span>Home</span>
-          </a>
-
           <a href="#support" class="nav-item" style="color: black">
             <i class="fas fa-headset"></i>
             <span>Hỗ trợ</span>
@@ -542,35 +549,22 @@
 
         <div id="endChatContentInsufficient" style="display: none">
           <h2>
-            <i class="fas fa-exclamation-triangle"></i> Cần thêm thông tin
+            <i class="fas fa-clipboard-list"></i> Còn một vài câu hỏi nữa!
           </h2>
           <p class="modal-subtitle">
-            Cảm ơn bạn đã chia sẻ! Tuy nhiên, để chúng tôi có thể tạo ra website
-            hoàn hảo cho bạn, chúng tôi cần thêm một số thông tin quan trọng.
+            Cảm ơn bạn đã chia sẻ! Để tạo ra website hoàn hảo nhất, chúng tôi
+            cần thêm một chút thông tin từ bạn.
           </p>
 
-          <div class="insufficient-summary">
-            <h3>
-              <i class="fas fa-info-circle"></i> Thông tin bạn đã cung cấp
-            </h3>
-            <div id="providedInfoSummary" class="provided-info">
-              <!-- Summary of provided info -->
-            </div>
-          </div>
-
           <div class="missing-questions">
-            <h3>
-              <i class="fas fa-clipboard-question"></i> Vui lòng trả lời thêm
-              các câu hỏi sau
-            </h3>
-            <p class="missing-desc">
-              Hãy nhấn vào nút micro <i class="fas fa-microphone"></i> và trả
-              lời từng câu hỏi bên dưới. Bạn chỉ cần nói tự nhiên như khi trò
-              chuyện, chúng tôi sẽ hiểu và ghi nhận.
-            </p>
             <div id="missingQuestionsList" class="missing-questions-list">
               <!-- Missing questions will be listed here -->
             </div>
+            <p class="missing-instruction">
+              <i class="fas fa-microphone"></i>
+              Nhấn nút micro và trả lời từng câu, bạn chỉ cần nói tự nhiên như
+              khi trò chuyện.
+            </p>
           </div>
 
           <div class="modal-actions">

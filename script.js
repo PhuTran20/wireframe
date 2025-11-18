@@ -534,8 +534,13 @@ function onProgressComplete() {
 
 // Session Management Functions
 function saveSession() {
+    // Tạo tên phiên dựa trên dự án hoặc thời gian
+    const projectType = appState.qaData[0]?.answer || 'Dự án mới';
+    const sessionName = projectType.substring(0, 50) + (projectType.length > 50 ? '...' : '');
+    
     // Lưu appState vào localStorage
     const sessionData = {
+        sessionName: sessionName,
         qaData: appState.qaData,
         chatHistory: appState.chatHistory,
         credit: appState.credit,
@@ -544,45 +549,74 @@ function saveSession() {
         summaryViewed: appState.summaryViewed,
         completionMessageShown: appState.completionMessageShown,
         improvementMessageShown: appState.improvementMessageShown,
+        isPaused: appState.isPaused,
         timestamp: new Date().toISOString()
     };
     
-    localStorage.setItem('wireframeSession', JSON.stringify(sessionData));
+    // Lưu session hiện tại
+    const sessionId = 'session_' + Date.now();
+    localStorage.setItem('currentSessionId', sessionId);
+    localStorage.setItem(sessionId, JSON.stringify(sessionData));
+    
+    // Cập nhật danh sách sessions
+    let sessions = JSON.parse(localStorage.getItem('allSessions') || '[]');
+    if (!sessions.find(s => s.id === sessionId)) {
+        sessions.push({
+            id: sessionId,
+            name: sessionName,
+            timestamp: sessionData.timestamp
+        });
+        localStorage.setItem('allSessions', JSON.stringify(sessions));
+    }
+    
+    // Cập nhật UI
+    updateSessionSelector();
+    updateSessionNameDisplay(sessionName);
+    
     appState.sessionSaved = true;
 }
 
 function loadSavedSession() {
     // Kiểm tra xem có phiên làm việc đã lưu không
-    const savedSession = localStorage.getItem('wireframeSession');
+    const currentSessionId = localStorage.getItem('currentSessionId');
     
-    if (savedSession) {
-        try {
-            const sessionData = JSON.parse(savedSession);
-            
-            // Khôi phục dữ liệu
-            appState.qaData = sessionData.qaData || [];
-            appState.chatHistory = sessionData.chatHistory || [];
-            appState.credit = sessionData.credit || 50000000;
-            appState.totalCost = sessionData.totalCost || 0;
-            appState.currentStep = sessionData.currentStep || 1;
-            appState.summaryViewed = sessionData.summaryViewed || false;
-            appState.completionMessageShown = sessionData.completionMessageShown || false;
-            appState.improvementMessageShown = sessionData.improvementMessageShown || false;
-            appState.sessionSaved = true;
-            
-            // Nếu có QA data, cập nhật UI
-            if (appState.qaData.length > 0) {
-                // Refresh QA list
-                setTimeout(() => {
-                    refreshQAList();
-                    checkStep1Completion();
-                    
-                    // Hiển thị thông báo
-                    addChatMessage('✓ Đã tải lại phiên làm việc trước đó của bạn. Bạn có thể tiếp tục bằng cách nhấn nút micro.', 'bot');
-                }, 500);
+    if (currentSessionId) {
+        const savedSession = localStorage.getItem(currentSessionId);
+        
+        if (savedSession) {
+            try {
+                const sessionData = JSON.parse(savedSession);
+                
+                // Khôi phục dữ liệu
+                appState.qaData = sessionData.qaData || [];
+                appState.chatHistory = sessionData.chatHistory || [];
+                appState.credit = sessionData.credit || 50000000;
+                appState.totalCost = sessionData.totalCost || 0;
+                appState.currentStep = sessionData.currentStep || 1;
+                appState.summaryViewed = sessionData.summaryViewed || false;
+                appState.completionMessageShown = sessionData.completionMessageShown || false;
+                appState.improvementMessageShown = sessionData.improvementMessageShown || false;
+                appState.isPaused = sessionData.isPaused || false;
+                appState.sessionSaved = true;
+                
+                // Cập nhật UI
+                updateSessionSelector();
+                updateSessionNameDisplay(sessionData.sessionName || 'Phiên hiện tại');
+                
+                // Nếu có QA data, cập nhật UI
+                if (appState.qaData.length > 0) {
+                    // Refresh QA list
+                    setTimeout(() => {
+                        refreshQAList();
+                        checkStep1Completion();
+                        
+                        // Hiển thị thông báo
+                        addChatMessage('✓ Đã tải lại phiên làm việc trước đó của bạn. Bạn có thể tiếp tục bằng cách nhấn nút micro.', 'bot');
+                    }, 500);
+                }
+            } catch (e) {
+                console.error('Lỗi tải phiên làm việc:', e);
             }
-        } catch (e) {
-            console.error('Lỗi tải phiên làm việc:', e);
         }
     }
 }
@@ -1775,12 +1809,7 @@ function showInsufficientSummary() {
     document.getElementById('endChatContentSufficient').style.display = 'none';
     document.getElementById('endChatContentInsufficient').style.display = 'block';
     
-    // Show what has been provided
-    const providedInfo = document.getElementById('providedInfoSummary');
-    const providedSummary = generateProvidedInfoSummary();
-    providedInfo.innerHTML = providedSummary;
-    
-    // Show missing questions
+    // Show missing questions in simple format
     const missingList = document.getElementById('missingQuestionsList');
     const missingQuestions = getMissingOrPoorQuestions();
     
@@ -1789,17 +1818,15 @@ function showInsufficientSummary() {
             <div class="missing-q-number">${index + 1}</div>
             <div class="missing-q-content">
                 <div class="missing-q-text">
-                    <i class="fas fa-question-circle"></i>
                     <strong>${item.question}</strong>
                 </div>
                 <div class="missing-q-hint">
-                    <i class="fas fa-info-circle"></i>
                     ${item.hint}
                 </div>
                 ${item.currentAnswer ? `
                     <div class="missing-q-current">
                         <strong>Câu trả lời hiện tại:</strong> ${item.currentAnswer}
-                        <br><strong>Vấn đề:</strong> ${item.issue}
+                        <br><strong>Cần cải thiện:</strong> ${item.issue}
                     </div>
                 ` : ''}
             </div>
@@ -1949,9 +1976,96 @@ function proceedFromEndChat() {
     // Add a friendly message and go to next step
     addChatMessage('🎉 Tuyệt vời! Chuyển sang bước xem báo giá...', 'bot');
     
-    // Auto navigate to step 2 after a short delay
+    // Auto go to next step after short delay
     setTimeout(() => {
         goToStep(2);
     }, 1000);
 }
+
+// Session Management Functions
+function updateSessionSelector() {
+    const sessionSelect = document.getElementById('sessionSelect');
+    const sessions = JSON.parse(localStorage.getItem('allSessions') || '[]');
+    const currentSessionId = localStorage.getItem('currentSessionId');
+    
+    // Clear existing options
+    sessionSelect.innerHTML = '';
+    
+    // Add sessions
+    if (sessions.length === 0) {
+        const option = document.createElement('option');
+        option.value = 'current';
+        option.textContent = 'Phiên hiện tại';
+        sessionSelect.appendChild(option);
+    } else {
+        sessions.forEach(session => {
+            const option = document.createElement('option');
+            option.value = session.id;
+            option.textContent = session.name;
+            if (session.id === currentSessionId) {
+                option.selected = true;
+            }
+            sessionSelect.appendChild(option);
+        });
+    }
+    
+    // Add "New Session" option
+    const newOption = document.createElement('option');
+    newOption.value = 'new';
+    newOption.textContent = '+ Tạo phiên mới';
+    sessionSelect.appendChild(newOption);
+}
+
+function updateSessionNameDisplay(name) {
+    const sessionNameEl = document.getElementById('sessionName');
+    if (sessionNameEl) {
+        sessionNameEl.textContent = name || 'Chưa đặt tên';
+    }
+}
+
+function switchSession(sessionId) {
+    if (sessionId === 'new') {
+        // Create new session
+        if (confirm('Bạn có muốn tạo phiên làm việc mới? Phiên hiện tại sẽ được lưu lại.')) {
+            saveSession();
+            location.reload();
+        } else {
+            // Reset select to current session
+            updateSessionSelector();
+        }
+        return;
+    }
+    
+    const sessionData = localStorage.getItem(sessionId);
+    if (sessionData) {
+        try {
+            const data = JSON.parse(sessionData);
+            
+            // Save current session first
+            if (appState.qaData.length > 0) {
+                saveSession();
+            }
+            
+            // Load selected session
+            localStorage.setItem('currentSessionId', sessionId);
+            location.reload();
+        } catch (e) {
+            console.error('Lỗi chuyển phiên:', e);
+        }
+    }
+}
+
+// Initialize session selector on page load
+document.addEventListener('DOMContentLoaded', function() {
+    // Update session selector
+    updateSessionSelector();
+    
+    // Add event listener for session change
+    const sessionSelect = document.getElementById('sessionSelect');
+    if (sessionSelect) {
+        sessionSelect.addEventListener('change', function(e) {
+            switchSession(e.target.value);
+        });
+    }
+});
 
