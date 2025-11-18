@@ -553,15 +553,54 @@ body {
     text-transform: uppercase;
     line-height: 1;
     white-space: nowrap;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+}
+
+.status-dot {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    display: inline-block;
+    flex-shrink: 0;
+}
+
+.status-dot.ready {
+    background-color: #24a148;
+    box-shadow: 0 0 4px rgba(36, 161, 72, 0.5);
+}
+
+.status-dot.recording {
+    background-color: #da1e28;
+    box-shadow: 0 0 4px rgba(218, 30, 40, 0.5);
+    animation: dotPulse 1.5s ease-in-out infinite;
+}
+
+.status-dot.processing {
+    background-color: #f1c21b;
+    box-shadow: 0 0 4px rgba(241, 194, 27, 0.5);
+    animation: dotPulse 1s ease-in-out infinite;
 }
 
 .voice-status.recording {
     color: var(--danger-color);
-    animation: statusBlink 1.5s ease-in-out infinite;
 }
 
 .voice-status.processing {
-    color: var(--primary-color);
+    color: var(--warning-color);
+}
+
+@keyframes dotPulse {
+    0%, 100% { 
+        opacity: 1;
+        transform: scale(1);
+    }
+    50% { 
+        opacity: 0.6;
+        transform: scale(1.2);
+    }
 }
 
 @keyframes statusBlink {

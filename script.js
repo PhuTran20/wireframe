@@ -730,7 +730,7 @@ function startRecording() {
     micBtn.classList.add('recording');
     voiceVisualizer.classList.add('active');
     voiceStatus.classList.add('recording');
-    voiceStatus.textContent = '🔴 Đang ghi âm...';
+    voiceStatus.innerHTML = '<span class="status-dot recording"></span>Đang ghi âm...';
     
     // Simulate recording for 3 seconds
     setTimeout(() => {
@@ -746,13 +746,13 @@ function stopRecording() {
     voiceVisualizer.classList.remove('active');
     voiceStatus.classList.remove('recording');
     voiceStatus.classList.add('processing');
-    voiceStatus.textContent = '⚡ Đang xử lý...';
+    voiceStatus.innerHTML = '<span class="status-dot processing"></span>Đang xử lý...';
     
     // Simulate LLM processing
     setTimeout(() => {
         processVoiceInput();
         voiceStatus.classList.remove('processing');
-        voiceStatus.textContent = '✓ Sẵn sàng ghi âm';
+        voiceStatus.innerHTML = '<span class="status-dot ready"></span>Sẵn sàng ghi âm';
     }, 1500);
 }
 
@@ -763,18 +763,18 @@ function processVoiceInput() {
         const qa = appState.qaData[editIndex];
         
         // Simulate recording to processing
-        voiceStatus.textContent = '🎤 Đang ghi âm câu trả lời mới...';
+        voiceStatus.innerHTML = '<span class="status-dot recording"></span>Đang ghi âm câu trả lời mới...';
         
         setTimeout(() => {
             voiceStatus.classList.add('processing');
-            voiceStatus.textContent = '⚡ Đang xử lý...';
+            voiceStatus.innerHTML = '<span class="status-dot processing"></span>Đang xử lý...';
             
             // Generate improved answer automatically
             const improvedAnswer = generateImprovedAnswer(qa.question, qa.answer);
             
             setTimeout(() => {
                 voiceStatus.classList.remove('processing');
-                voiceStatus.textContent = '✓ Sẵn sàng ghi âm';
+                voiceStatus.innerHTML = '<span class="status-dot ready"></span>Sẵn sàng ghi âm';
                 
                 // Display improved answer as user message
                 addChatMessage(improvedAnswer, 'user');
